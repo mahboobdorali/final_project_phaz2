@@ -12,10 +12,5 @@ import java.util.Optional;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
-    Optional<Customer> findByEmail(String emailAddress);
-
-    @Transactional
-    @Modifying
-    @Query("update Customer c set c.password=:password where c.emailAddress=:emailAddress")
-    void updatePasswordByEmailAddress(@Param("password") String password,@Param("emailAddress") String emailAddress);
+    Optional<Customer> findByEmailAddress(String emailAddress);
 }
