@@ -13,7 +13,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Service extends BaseEntity {
+public class MainTask extends BaseEntity {
 
     @Column(unique = true)
     private String name;
