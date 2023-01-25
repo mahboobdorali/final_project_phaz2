@@ -13,8 +13,8 @@ public class AdminService {
     private final ServiceUnderService serviceUnderService;
     private final MainTaskService mainTaskService;
     private final ExpertService expertService;
-  //  private final Expert expert;
-    private final UnderService underService;
+
+
 
     public void showAllOfMainServiceByAdmin() {
 
@@ -58,7 +58,7 @@ public class AdminService {
         serviceUnderService.saveAllUnderService(underService);
     }
 
-    public void updateUnderService(String newDescription, double newPrice, String nameOfUnderService) throws NoResultException {
+    public void updateUnderService(String newDescription, double newPrice, String nameOfUnderService,UnderService underService) throws NoResultException {
         serviceUnderService.underServiceByName(nameOfUnderService);
         underService.setBriefExplanation(newDescription);
         underService.setBasePrice(newPrice);
