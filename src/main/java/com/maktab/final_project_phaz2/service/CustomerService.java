@@ -19,7 +19,7 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final ServiceUnderService serviceUnderService;
     private final MainTaskService mainTaskService;
-    private final UnderService underService;
+
     private final OrderService orderService;
     private final OfferRepository offerRepository;
     private final OfferService offerService;
@@ -61,13 +61,11 @@ public class CustomerService {
         return serviceUnderService.underServiceByName(nameOfUnder);
     }
 
-    public MainTask showAllService(String nameOfService) throws NoResultException {
+    public MainTask showAllServiceByName(String nameOfService) throws NoResultException {
         return mainTaskService.getServiceByName(nameOfService);
     }
 
-    public void Order(OrderCustomer ordersCustomer, String nameTheService, String nameTheSubService) throws NoResultException {
-        showAllService(nameTheService);
-        showUnderByName(nameTheSubService);
+    public void Order(OrderCustomer ordersCustomer,UnderService underService) throws NoResultException {
         if (ordersCustomer.getProposedPrice() < underService.getBasePrice() || (!(DateUtil.isDateValid(ordersCustomer.getDateAndTimeOfWork()))))
             throw new NoResultException("the entered price is lower than the allowed limit!!");
         ordersCustomer.setCurrentSituation(CurrentSituation.WAITING_FOR_EXPERT_ADVICE);
@@ -85,5 +83,18 @@ public class CustomerService {
         offerService.updateOffer(offer);
     }
 
+    public void changeSituationByCustomer(Long id) throws NoResultException {
+        Offer offerId = offerService.findById(id);
+        if (!(offerId.getOrdersCustomer().getCurrentSituation().equals(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION_TO_COME)))
+            throw new NoResultException("please first select your expert");
+        offerId.getOrdersCustomer().setCurrentSituation(CurrentSituation.STARTED);
+        offerService.updateOffer(offerId);
+    }
+
+    public void changeSituationToFinish(Long id) {
+        Offer offerById = offerService.findById(id);
+        offerById.getOrdersCustomer().setCurrentSituation(CurrentSituation.DONE);
+        offerService.updateOffer(offerById);
+    }
 
 }

@@ -27,7 +27,7 @@ public class Expert extends Person implements Serializable {
     @Enumerated(EnumType.STRING)
     private ApprovalStatus approvalStatus;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY,cascade=CascadeType.PERSIST)
     private List<UnderService> underServiceList = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY)

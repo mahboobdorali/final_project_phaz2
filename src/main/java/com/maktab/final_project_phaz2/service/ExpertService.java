@@ -15,9 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExpertService {
     private final ExpertRepository expertRepository;
-    private final UnderService underService;
     private final OfferService offerService;
-
 
     public void registerExpert(Expert expert) {
         expertRepository.save(expert);
@@ -26,9 +24,10 @@ public class ExpertService {
     public void deleteExpert(Expert expert) {
         expertRepository.delete(expert);
     }
+
     public void updateExpert(Expert expert) {
 
-         expertRepository.save(expert);
+        expertRepository.save(expert);
     }
 
     public List<Expert> getAllExpert() {
@@ -58,14 +57,14 @@ public class ExpertService {
                 orElseThrow(() -> new NoResultException(" this expert dose not exist"));
     }
 
-    public void OfferAnSubmit(Offer offer) throws NoResultException {
+    public void OfferAnSubmit(Offer offer, UnderService underService) throws NoResultException {
         if (offer.getPriceOffer() < underService.getBasePrice() || (!(DateUtil.isDateValid(offer.getTimeProposeToStartWork()))))
             throw new NoResultException("your price or date is not available");
         if (!(offer.getOrdersCustomer().getCurrentSituation().equals(CurrentSituation.WAITING_FOR_EXPERT_ADVICE))
                 || (!(offer.getOrdersCustomer().getCurrentSituation().equals(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION))))
             throw new NoResultException("your state is not safe");
-        offerService.saveAllOffer(offer);
         offer.getOrdersCustomer().setCurrentSituation(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION);
+        offerService.saveAllOffer(offer);
     }
 
 }
