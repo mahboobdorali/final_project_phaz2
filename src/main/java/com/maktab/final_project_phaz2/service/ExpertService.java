@@ -1,5 +1,8 @@
 package com.maktab.final_project_phaz2.service;
-import com.maktab.final_project_phaz2.date.model.Expert;
+
+import com.maktab.final_project_phaz2.Util.DateUtil;
+import com.maktab.final_project_phaz2.date.model.*;
+import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.date.repository.ExpertRepository;
 
 import com.maktab.final_project_phaz2.exception.NoResultException;
@@ -12,6 +15,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ExpertService {
     private final ExpertRepository expertRepository;
+    private final UnderService underService;
+    private final OfferService offerService;
+
 
     public void registerExpert(Expert expert) {
         expertRepository.save(expert);
@@ -19,6 +25,10 @@ public class ExpertService {
 
     public void deleteExpert(Expert expert) {
         expertRepository.delete(expert);
+    }
+    public void updateExpert(Expert expert) {
+
+         expertRepository.save(expert);
     }
 
     public List<Expert> getAllExpert() {
@@ -29,25 +39,34 @@ public class ExpertService {
     public Expert logInExpert(String emailAddress, String password) throws NoResultException {
         Expert expert = expertRepository.findByEmailAddress(emailAddress).
                 orElseThrow(() -> new NoResultException(" this customer dose not exist"));
-        if (expert.getPassword().equals(password))
-            return expert;
-        throw new NoResultException("is not exist password");
+        if (!(expert.getPassword().equals(password)))
+            throw new NoResultException("is not exist password");
+        return expert;
     }
 
     public void changePassword(String emailAddress, String oldPassword, String newPassword) throws NoResultException {
         Expert expert = expertRepository.findByEmailAddress(emailAddress).
                 orElseThrow(() -> new NoResultException(" this customer dose not exist"));
-        if (expert.getPassword().equals(oldPassword))
-            expert.setPassword(newPassword);
+        if (!(expert.getPassword().equals(oldPassword)))
+            throw new NoResultException("is not exist password");
+        expert.setPassword(newPassword);
         expertRepository.save(expert);
-        throw new NoResultException("is not exist password");
     }
 
     public Expert findExpertByEmail(String emailAddress) throws NoResultException {
         return expertRepository.findByEmailAddress(emailAddress).
                 orElseThrow(() -> new NoResultException(" this expert dose not exist"));
     }
-    public Expert updateExpert(Expert expert){
-        return expertRepository.save(expert);
+
+    public void OfferAnSubmit(Offer offer) throws NoResultException {
+        if (offer.getPriceOffer() < underService.getBasePrice() || (!(DateUtil.isDateValid(offer.getTimeProposeToStartWork()))))
+            throw new NoResultException("your price or date is not available");
+        if (!(offer.getOrdersCustomer().getCurrentSituation().equals(CurrentSituation.WAITING_FOR_EXPERT_ADVICE))
+                || (!(offer.getOrdersCustomer().getCurrentSituation().equals(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION))))
+            throw new NoResultException("your state is not safe");
+        offerService.saveAllOffer(offer);
+        offer.getOrdersCustomer().setCurrentSituation(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION);
     }
+
 }
+

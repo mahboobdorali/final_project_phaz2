@@ -1,12 +1,9 @@
 package com.maktab.final_project_phaz2.date.model;
-
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+
 
 @Getter
 @Setter
@@ -20,8 +17,8 @@ public class OrderCustomer extends BaseEntity{
     @ManyToOne
     private Expert expert;
 
-    @ManyToMany
-    private List<UnderService> underService=new ArrayList<>();
+    @ManyToOne
+    private UnderService underService;
 
     private double proposedPrice;
 
