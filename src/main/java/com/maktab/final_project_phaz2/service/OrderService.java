@@ -1,5 +1,4 @@
 package com.maktab.final_project_phaz2.service;
-import com.maktab.final_project_phaz2.date.model.Customer;
 import com.maktab.final_project_phaz2.date.model.OrderCustomer;
 import com.maktab.final_project_phaz2.date.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
