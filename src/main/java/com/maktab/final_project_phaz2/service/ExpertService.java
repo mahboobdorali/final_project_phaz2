@@ -4,12 +4,10 @@ import com.maktab.final_project_phaz2.Util.DateUtil;
 import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.date.repository.ExpertRepository;
-
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -58,11 +56,13 @@ public class ExpertService {
                 orElseThrow(() -> new NoResultException("this expert dose not exist"));
     }
 
-    public Offer OfferAnSubmit(Offer offer, UnderService underService) throws NoResultException {
+    public Offer OfferAnSubmit(Offer offer) throws NoResultException {
+        UnderService underService = new UnderService();
         if (offer.getPriceOffer() < underService.getBasePrice())
             throw new NoResultException("your price  is not available");
-        if(!(DateUtil.isDateValid(offer.getTimeProposeToStartWork())))
+        if (DateUtil.isNotDateValid(offer.getTimeProposeToStartWork())) {
             throw new NoResultException("your date is not available");
+        }
         OrderCustomer orderCustomer = offer.getOrdersCustomer();
         checkSituation(orderCustomer.getCurrentSituation());
         offer.getOrdersCustomer().setCurrentSituation(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION);
@@ -75,7 +75,7 @@ public class ExpertService {
                 CurrentSituation.PAID,
                 CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION_TO_COME,
                 CurrentSituation.STARTED);
-        if(currentSituationList.contains(currentSituation))
+        if (currentSituationList.contains(currentSituation))
             throw new NoResultException("your state is not safe");
     }
 

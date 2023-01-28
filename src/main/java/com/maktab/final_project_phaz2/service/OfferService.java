@@ -1,8 +1,6 @@
 package com.maktab.final_project_phaz2.service;
 
-import com.maktab.final_project_phaz2.date.model.Customer;
 import com.maktab.final_project_phaz2.date.model.Offer;
-import com.maktab.final_project_phaz2.date.model.OrderCustomer;
 import com.maktab.final_project_phaz2.date.repository.OfferRepository;
 import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +18,7 @@ public class OfferService {
         offerRepository.save(offer);
     }
 
-    public void deleteAllOffer(Offer offer) {
+    public void deleteOffer(Offer offer) {
 
         offerRepository.delete(offer);
     }

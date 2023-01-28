@@ -9,7 +9,10 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -24,9 +27,9 @@ class MainTaskTest {
 
     @Test
     @Order(1)
-    void registerMainTask() throws NoResultException {
-        mainTaskService.saveAllService(mainTask);
-        Assertions.assertThat(mainTask.getId()).isGreaterThan(0);
+    void addServiceByAdmin() throws DuplicateEntryException {
+        mainTaskService.addServiceByAdmin(mainTask1);
+        org.junit.jupiter.api.Assertions.assertTrue(true, "***exist this service***");
     }
 
     @Test
@@ -38,9 +41,25 @@ class MainTaskTest {
 
     @Test
     @Order(3)
-    void addServiceByAdmin() throws DuplicateEntryException {
-    mainTaskService.addServiceByAdmin(mainTask1);
-        org.junit.jupiter.api.Assertions.assertTrue(true, "exist ***");
+    void editMainTask() throws NoResultException {
+        MainTask mainTask2 = mainTaskService.findServiceByName(mainTask1.getName());
+        mainTask2.setName("sweep the room!!");
+        MainTask task = mainTaskService.editService(mainTask2);
+        Assertions.assertThat(task.getName()).isEqualTo("sweep the room!!");
+    }
+
+    @Test
+    @Order(4)
+    void deleteMainTask() {
+        try {
+            MainTask serviceById = mainTaskService.findServiceById(1L);
+            mainTaskService.deleteAllService(serviceById);
+            mainTaskService.findServiceById(1L);
+            Assertions.assertThat(mainTask1).isNull();
+        } catch (NoResultException e) {
+            assertEquals("this service is not exist", e.getMessage());
+        }
     }
 }
+
 

@@ -4,8 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.Duration;
 import java.util.Date;
+
 @Getter
 @Setter
 @ToString
@@ -18,10 +20,10 @@ public class Offer extends BaseEntity {
     @Temporal(value = TemporalType.TIMESTAMP)
     private Date dateAndTimeRegistrationOfOffer;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private Expert expert;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private OrderCustomer ordersCustomer;
 
     private double priceOffer;

@@ -1,5 +1,6 @@
 package com.maktab.final_project_phaz2.service;
 
+import com.maktab.final_project_phaz2.date.model.Expert;
 import com.maktab.final_project_phaz2.date.model.MainTask;
 import com.maktab.final_project_phaz2.date.model.UnderService;
 import com.maktab.final_project_phaz2.exception.DuplicateEntryException;
@@ -17,15 +18,18 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-
- class UnderServiceTest {
+class UnderServiceTest {
     @Autowired
     private ServiceUnderService serviceUnderService;
-    UnderService underService1=UnderService.builder().nameSubService("sweep the room").basePrice(50000).briefExplanation("sweeping the room in tehran").build();
-    UnderService underService2=UnderService.builder().nameSubService("wipe thw glass").basePrice(35000).briefExplanation("cleaning the glass of a three-story house").build();
+    @Autowired
+    private AdminService adminService;
+    UnderService underService1 = UnderService.builder().nameSubService("sweep the room").basePrice(50000).briefExplanation("sweeping the room in tehran").build();
+    UnderService underService2 = UnderService.builder().nameSubService("wipe the glass").basePrice(35000).briefExplanation("cleaning the glass of a three-story house").build();
 
     @BeforeAll
     static void setup(@Autowired DataSource dataSource) {
@@ -35,24 +39,47 @@ import java.util.List;
             e.printStackTrace();
         }
     }
-        @Test
-        @Order(1)
-        void registerUnderService()   {
-           serviceUnderService.saveAllUnderService(underService1);
-            org.assertj.core.api.Assertions.assertThat(underService1.getId()).isGreaterThan(0);
-        }
 
-        @Test
-        @Order(2)
-        void getListOfMainTask() {
-            List<UnderService> allUnderService = serviceUnderService.getAllUnderService();
-            org.assertj.core.api.Assertions.assertThat(allUnderService.size()).isGreaterThan(0);
-        }
+    @Test
+    @Order(1)
+    void addServiceByAdmin() throws DuplicateEntryException {
+        serviceUnderService.addUnderServiceByAdmin(underService2);
+        org.junit.jupiter.api.Assertions.assertTrue(true, "exist this underService ***");
+    }
 
-        @Test
-        @Order(3)
-        void addServiceByAdmin() throws DuplicateEntryException {
-            serviceUnderService.addUnderServiceByAdmin(underService2);
-            org.junit.jupiter.api.Assertions.assertTrue(true, "exist this underService ***");
+    @Test
+    @Order(2)
+    void getListOfMainTask() {
+        List<UnderService> allUnderService = serviceUnderService.getAllUnderService();
+        org.assertj.core.api.Assertions.assertThat(allUnderService.size()).isGreaterThan(0);
+    }
+
+    @Test
+    @Order(3)
+    void changeDescriptionUnderServiceTest() throws NoResultException {
+        String newDescription = "washing the carpet";
+        UnderService underService = adminService.changeDescription(newDescription, underService2);
+        assertEquals(newDescription, underService.getBriefExplanation());
+    }
+
+    @Test
+    @Order(4)
+    void changePriceUnderServiceTest() throws NoResultException {
+        double newPrice = 400000;
+        UnderService underService = adminService.changePriceUnderService(newPrice, underService2);
+        assertEquals(newPrice, underService.getBasePrice());
+    }
+
+    @Test
+    @Order(5)
+    void deleteUnderService() {
+        try {
+            UnderService underServiceById = serviceUnderService.findUnderServiceById(1L);
+            serviceUnderService.deleteAllUnderService(underServiceById);
+            serviceUnderService.findUnderServiceById(1L);
+            org.assertj.core.api.Assertions.assertThat(underService2).isNull();
+        } catch (NoResultException e) {
+            assertEquals("this underService is not exist", e.getMessage());
         }
     }
+}

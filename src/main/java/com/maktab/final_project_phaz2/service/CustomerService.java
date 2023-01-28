@@ -4,9 +4,7 @@ import com.maktab.final_project_phaz2.Util.DateUtil;
 import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.date.repository.CustomerRepository;
-
 import com.maktab.final_project_phaz2.date.repository.OfferRepository;
-import com.maktab.final_project_phaz2.exception.DuplicateEntryException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -18,9 +16,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomerService {
     private final CustomerRepository customerRepository;
-    private final ServiceUnderService serviceUnderService;
-    private final MainTaskService mainTaskService;
-
     private final OrderService orderService;
     private final OfferRepository offerRepository;
     private final OfferService offerService;
@@ -48,6 +43,7 @@ public class CustomerService {
             throw new NoResultException("is not exist password");
         return customer;
     }
+
     public Customer findCustomerByEmail(String emailAddress) throws NoResultException {
         return customerRepository.findByEmailAddress(emailAddress).
                 orElseThrow(() -> new NoResultException("this customer dose not exist"));
@@ -70,8 +66,8 @@ public class CustomerService {
         return mainTaskService.getServiceByName(nameOfService);
     }*/
 
-    public void Order(OrderCustomer ordersCustomer,UnderService underService) throws NoResultException {
-        if (ordersCustomer.getProposedPrice() < underService.getBasePrice() || (!(DateUtil.isDateValid(ordersCustomer.getDateAndTimeOfWork()))))
+    public void Order(OrderCustomer ordersCustomer, UnderService underService) throws NoResultException {
+        if (ordersCustomer.getProposedPrice() < underService.getBasePrice() || (DateUtil.isNotDateValid(ordersCustomer.getDateAndTimeOfWork())))
             throw new NoResultException("the entered price is lower than the allowed limit!!");
         ordersCustomer.setCurrentSituation(CurrentSituation.WAITING_FOR_EXPERT_ADVICE);
         orderService.saveAllOrder(ordersCustomer);
