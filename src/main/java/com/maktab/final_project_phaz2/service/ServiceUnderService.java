@@ -1,13 +1,16 @@
 package com.maktab.final_project_phaz2.service;
 
+import com.maktab.final_project_phaz2.date.model.MainTask;
 import com.maktab.final_project_phaz2.date.model.UnderService;
 import com.maktab.final_project_phaz2.date.repository.UnderServiceRepository;
 
+import com.maktab.final_project_phaz2.exception.DuplicateEntryException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +32,10 @@ public class ServiceUnderService {
         return underServiceRepository.findAll();
     }
 
-
-    public UnderService underServiceByName(String nameSubService) throws NoResultException {
-        return underServiceRepository.findByNameSubService(nameSubService).orElseThrow(() -> new NoResultException("this underService is duplicate ):"));
+    public UnderService addUnderServiceByAdmin(UnderService underService) throws DuplicateEntryException {
+        Optional<UnderService> byNameSubService = underServiceRepository.findByNameSubService(underService.getNameSubService());
+        if (byNameSubService.isPresent())
+            throw new DuplicateEntryException("this UnderService already exist");
+        return underServiceRepository.save(underService);
     }
 }

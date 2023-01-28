@@ -6,6 +6,7 @@ import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.date.repository.CustomerRepository;
 
 import com.maktab.final_project_phaz2.date.repository.OfferRepository;
+import com.maktab.final_project_phaz2.exception.DuplicateEntryException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -61,13 +62,13 @@ public class CustomerService {
         customerRepository.save(customer);
     }
 
-    public UnderService showUnderByName(String nameOfUnder) throws NoResultException {
+   /* public UnderService showUnderByName(String nameOfUnder) throws NoResultException {
         return serviceUnderService.underServiceByName(nameOfUnder);
-    }
+    }*/
 
-    public MainTask showAllServiceByName(String nameOfService) throws NoResultException {
+   /* public MainTask showAllServiceByName(String nameOfService) throws  DuplicateEntryException {
         return mainTaskService.getServiceByName(nameOfService);
-    }
+    }*/
 
     public void Order(OrderCustomer ordersCustomer,UnderService underService) throws NoResultException {
         if (ordersCustomer.getProposedPrice() < underService.getBasePrice() || (!(DateUtil.isDateValid(ordersCustomer.getDateAndTimeOfWork()))))

@@ -1,12 +1,15 @@
 package com.maktab.final_project_phaz2.service;
+
 import com.maktab.final_project_phaz2.date.model.MainTask;
 import com.maktab.final_project_phaz2.date.repository.ServiceRepository;
 
+import com.maktab.final_project_phaz2.exception.DuplicateEntryException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -26,9 +29,10 @@ public class MainTaskService {
         return serviceRepository.findAll();
     }
 
-    public MainTask getServiceByName(String nameService) throws NoResultException {
-        return serviceRepository.findByName(nameService).orElseThrow(() -> new NoResultException("this Service is duplicate ):"));
-
+    public MainTask addServiceByAdmin(MainTask mainTask) throws DuplicateEntryException {
+          Optional<MainTask> byName = serviceRepository.findByName(mainTask.getName());
+        if (byName.isPresent())
+            throw new DuplicateEntryException("this service already exist");
+        return serviceRepository.save(mainTask);
     }
-
 }
