@@ -21,7 +21,7 @@ public class Expert extends Person implements Serializable {
     private double averageScore;
 
     @Lob
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private byte[] image;
 
     @Enumerated(EnumType.STRING)
@@ -30,9 +30,9 @@ public class Expert extends Person implements Serializable {
     @ManyToMany(fetch = FetchType.LAZY,cascade=CascadeType.PERSIST)
     private List<UnderService> underServiceList = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "expert")
     private List<Comments> commentsList = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "expert")
     private List<OrderCustomer> ordersCustomer = new ArrayList<>();
 }

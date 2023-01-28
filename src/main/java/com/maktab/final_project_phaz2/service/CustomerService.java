@@ -47,6 +47,10 @@ public class CustomerService {
             throw new NoResultException("is not exist password");
         return customer;
     }
+    public Customer findCustomerByEmail(String emailAddress) throws NoResultException {
+        return customerRepository.findByEmailAddress(emailAddress).
+                orElseThrow(() -> new NoResultException("this customer dose not exist"));
+    }
 
     public void changePassword(String emailAddress, String oldPassword, String newPassword) throws NoResultException {
         Customer customer = customerRepository.findByEmailAddress(emailAddress).

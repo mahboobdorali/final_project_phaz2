@@ -2,6 +2,8 @@ package com.maktab.final_project_phaz2.date.model;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+
 import java.util.Date;
 
 
@@ -11,7 +13,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Builder
+@SuperBuilder
 public class OrderCustomer extends BaseEntity{
 
     @ManyToOne
@@ -19,6 +21,9 @@ public class OrderCustomer extends BaseEntity{
 
     @ManyToOne
     private UnderService underService;
+
+    @ManyToOne
+    private Customer customer;
 
     private double proposedPrice;
 

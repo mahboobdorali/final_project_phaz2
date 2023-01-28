@@ -2,6 +2,7 @@ package com.maktab.final_project_phaz2.date.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.Duration;
 import java.util.Date;
@@ -9,7 +10,7 @@ import java.util.Date;
 @Setter
 @ToString
 @Entity
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Offer extends BaseEntity {

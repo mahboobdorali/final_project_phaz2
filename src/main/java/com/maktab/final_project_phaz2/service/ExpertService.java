@@ -9,6 +9,7 @@ import com.maktab.final_project_phaz2.exception.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,9 +26,9 @@ public class ExpertService {
         expertRepository.delete(expert);
     }
 
-    public void updateExpert(Expert expert) {
+    public Expert updateExpert(Expert expert) {
 
-        expertRepository.save(expert);
+        return expertRepository.save(expert);
     }
 
     public List<Expert> getAllExpert() {
@@ -54,17 +55,28 @@ public class ExpertService {
 
     public Expert findExpertByEmail(String emailAddress) throws NoResultException {
         return expertRepository.findByEmailAddress(emailAddress).
-                orElseThrow(() -> new NoResultException(" this expert dose not exist"));
+                orElseThrow(() -> new NoResultException("this expert dose not exist"));
     }
 
-    public void OfferAnSubmit(Offer offer, UnderService underService) throws NoResultException {
-        if (offer.getPriceOffer() < underService.getBasePrice() || (!(DateUtil.isDateValid(offer.getTimeProposeToStartWork()))))
-            throw new NoResultException("your price or date is not available");
-        if (!(offer.getOrdersCustomer().getCurrentSituation().equals(CurrentSituation.WAITING_FOR_EXPERT_ADVICE))
-                || (!(offer.getOrdersCustomer().getCurrentSituation().equals(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION))))
-            throw new NoResultException("your state is not safe");
+    public Offer OfferAnSubmit(Offer offer, UnderService underService) throws NoResultException {
+        if (offer.getPriceOffer() < underService.getBasePrice())
+            throw new NoResultException("your price  is not available");
+        if(!(DateUtil.isDateValid(offer.getTimeProposeToStartWork())))
+            throw new NoResultException("your date is not available");
+        OrderCustomer orderCustomer = offer.getOrdersCustomer();
+        checkSituation(orderCustomer.getCurrentSituation());
         offer.getOrdersCustomer().setCurrentSituation(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION);
         offerService.saveAllOffer(offer);
+        return offer;
+    }
+
+    public void checkSituation(CurrentSituation currentSituation) throws NoResultException {
+        List<CurrentSituation> currentSituationList = List.of(CurrentSituation.DONE,
+                CurrentSituation.PAID,
+                CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION_TO_COME,
+                CurrentSituation.STARTED);
+        if(currentSituationList.contains(currentSituation))
+            throw new NoResultException("your state is not safe");
     }
 
 }

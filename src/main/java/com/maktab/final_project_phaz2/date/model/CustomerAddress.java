@@ -2,6 +2,7 @@ package com.maktab.final_project_phaz2.date.model;
 
 import jakarta.persistence.Embeddable;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @Embeddable
 @Getter
@@ -9,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @ToString
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 public class CustomerAddress {
 
     private String street;

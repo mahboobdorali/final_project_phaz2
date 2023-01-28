@@ -5,12 +5,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+
 @Setter
 @Getter
 @ToString
 @Inheritance(strategy = InheritanceType.JOINED)
 @Entity
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
 public class MainTask extends BaseEntity {
