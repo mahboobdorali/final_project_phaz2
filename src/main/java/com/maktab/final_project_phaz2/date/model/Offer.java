@@ -20,10 +20,10 @@ public class Offer extends BaseEntity {
     @Temporal(value = TemporalType.TIMESTAMP)
     private Date dateAndTimeRegistrationOfOffer;
 
-    @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.PERSIST,fetch = FetchType.LAZY)
     private Expert expert;
 
-    @ManyToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.PERSIST,fetch = FetchType.EAGER)
     private OrderCustomer ordersCustomer;
 
     private double priceOffer;

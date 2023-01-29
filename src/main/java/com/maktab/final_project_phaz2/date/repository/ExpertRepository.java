@@ -6,6 +6,8 @@ import java.util.Optional;
 @Repository
 public interface ExpertRepository extends JpaRepository<Expert,Long> {
     Optional<Expert> findByEmailAddress(String emailAddress);
+    Optional<Expert> findById(Long id);
+
 }
 
 

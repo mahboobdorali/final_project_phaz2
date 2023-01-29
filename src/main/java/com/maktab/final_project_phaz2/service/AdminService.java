@@ -6,6 +6,7 @@ import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,15 +36,19 @@ public class AdminService {
         return expert1;
     }
 
-    public Expert addExpertToUnderService(String underServiceName, Expert expert) throws NoResultException {
-        UnderService underService = serviceUnderService.findUnderServiceByName(underServiceName);
-        expert.getUnderServiceList().add(underService);
-        return expertService.updateExpert(expert);
+    public Expert addExpertToUnderService(Long idUnderService, Long idExpert) throws NoResultException {
+        UnderService underService = serviceUnderService.findUnderServiceById(idUnderService);
+        Expert expertById = expertService.findExpertById(idExpert);
+        expertById.getUnderServiceList().add(underService);
+        return expertService.updateExpert(expertById);
     }
 
-    public void deleteExpertFromUnderService(UnderService underService, Expert expert) {
-        expert.getUnderServiceList().remove(underService);
-        expertService.updateExpert(expert);
+    @Transactional
+    public Expert deleteExpertFromUnderService(Long idUnderService, Long idExpert) throws NoResultException {
+        UnderService underService = serviceUnderService.findUnderServiceById(idUnderService);
+        Expert expertById = expertService.findExpertById(idExpert);
+        expertById.getUnderServiceList().remove(underService);
+        return expertService.updateExpert(expertById);
     }
 
     public UnderService changeDescription(String newDescription, UnderService underService) throws NoResultException {

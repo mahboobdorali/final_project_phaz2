@@ -30,9 +30,9 @@ public class Expert extends Person implements Serializable {
     @ManyToMany(fetch = FetchType.LAZY,cascade=CascadeType.PERSIST)
     private List<UnderService> underServiceList = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "expert")
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "expert",cascade = CascadeType.PERSIST)
     private List<Comments> commentsList = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "expert")
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "expert",cascade = CascadeType.PERSIST)
     private List<OrderCustomer> ordersCustomer = new ArrayList<>();
 }

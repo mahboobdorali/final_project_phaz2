@@ -1,10 +1,7 @@
 package com.maktab.final_project_phaz2.date.model;
 
 import com.maktab.final_project_phaz2.date.model.enumuration.Role;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -22,6 +19,6 @@ import java.util.List;
 @SuperBuilder
 public class Customer extends Person implements Serializable {
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer",cascade = CascadeType.PERSIST)
     private List<OrderCustomer> orderCustomerList=new ArrayList<>();
    }

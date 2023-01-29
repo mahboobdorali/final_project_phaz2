@@ -19,6 +19,8 @@ public class CustomerService {
     private final OrderService orderService;
     private final OfferRepository offerRepository;
     private final OfferService offerService;
+    private final ServiceUnderService underService;
+    private final MainTaskService mainTaskService;
 
     public void registerCustomer(Customer customer) {
         customerRepository.save(customer);
@@ -58,19 +60,23 @@ public class CustomerService {
         customerRepository.save(customer);
     }
 
-   /* public UnderService showUnderByName(String nameOfUnder) throws NoResultException {
-        return serviceUnderService.underServiceByName(nameOfUnder);
-    }*/
+    public UnderService showUnderByName(String nameOfUnder) throws NoResultException {
+        return underService.findUnderServiceByName(nameOfUnder);
+    }
 
-   /* public MainTask showAllServiceByName(String nameOfService) throws  DuplicateEntryException {
-        return mainTaskService.getServiceByName(nameOfService);
-    }*/
+    public MainTask showAllServiceByName(String nameOfService) throws NoResultException {
+        return mainTaskService.findServiceByName(nameOfService);
+    }
 
-    public void Order(OrderCustomer ordersCustomer, UnderService underService) throws NoResultException {
-        if (ordersCustomer.getProposedPrice() < underService.getBasePrice() || (DateUtil.isNotDateValid(ordersCustomer.getDateAndTimeOfWork())))
+    public OrderCustomer Order(OrderCustomer ordersCustomer, Long idOfChoiceUnderService) throws NoResultException {
+        UnderService serviceById = underService.findUnderServiceById(idOfChoiceUnderService);
+        if (ordersCustomer.getProposedPrice() < serviceById.getBasePrice())
             throw new NoResultException("the entered price is lower than the allowed limit!!");
+        if (DateUtil.isNotDateValid(ordersCustomer.getDateAndTimeOfWork()))
+            throw new NoResultException("the entered date is lower than the allowed limit!!");
         ordersCustomer.setCurrentSituation(CurrentSituation.WAITING_FOR_EXPERT_ADVICE);
         orderService.saveAllOrder(ordersCustomer);
+        return ordersCustomer;
     }
 
     public List<Offer> sortByPrice(OrderCustomer orderCustomer) {
@@ -92,10 +98,9 @@ public class CustomerService {
         offerService.updateOffer(offerId);
     }
 
-    public void changeSituationToFinish(Long id) {
+    public void changeSituationToFinish(Long id) throws NoResultException {
         Offer offerById = offerService.findById(id);
         offerById.getOrdersCustomer().setCurrentSituation(CurrentSituation.DONE);
         offerService.updateOffer(offerById);
     }
-
 }

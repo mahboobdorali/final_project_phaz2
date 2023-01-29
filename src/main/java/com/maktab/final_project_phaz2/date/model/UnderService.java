@@ -1,9 +1,6 @@
 package com.maktab.final_project_phaz2.date.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -22,6 +19,6 @@ public class UnderService extends BaseEntity {
 
     private String briefExplanation;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.PERSIST)
     private MainTask MainTask;
 }

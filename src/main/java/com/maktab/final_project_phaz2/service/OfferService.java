@@ -2,7 +2,7 @@ package com.maktab.final_project_phaz2.service;
 
 import com.maktab.final_project_phaz2.date.model.Offer;
 import com.maktab.final_project_phaz2.date.repository.OfferRepository;
-import jakarta.persistence.NoResultException;
+import com.maktab.final_project_phaz2.exception.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +32,7 @@ public class OfferService {
         return offerRepository.save(offer);
     }
 
-    public Offer findById(Long id) {
+    public Offer findById(Long id) throws NoResultException {
 
         return offerRepository.findById(id).orElseThrow(() -> new NoResultException("this offer is not exist!!"));
     }

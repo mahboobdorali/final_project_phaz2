@@ -1,7 +1,5 @@
 package com.maktab.final_project_phaz2.service;
 
-import com.maktab.final_project_phaz2.date.model.Expert;
-import com.maktab.final_project_phaz2.date.model.MainTask;
 import com.maktab.final_project_phaz2.date.model.UnderService;
 import com.maktab.final_project_phaz2.exception.DuplicateEntryException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
@@ -42,10 +40,11 @@ class UnderServiceTest {
 
     @Test
     @Order(1)
-    void addServiceByAdmin() throws DuplicateEntryException {
+    void addUnderServiceByAdmin() throws DuplicateEntryException {
         serviceUnderService.addUnderServiceByAdmin(underService2);
         org.junit.jupiter.api.Assertions.assertTrue(true, "exist this underService ***");
     }
+
 
     @Test
     @Order(2)
@@ -71,7 +70,7 @@ class UnderServiceTest {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     void deleteUnderService() {
         try {
             UnderService underServiceById = serviceUnderService.findUnderServiceById(1L);

@@ -5,8 +5,6 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Date;
-
-
 @Getter
 @Setter
 @ToString
@@ -16,13 +14,13 @@ import java.util.Date;
 @SuperBuilder
 public class OrderCustomer extends BaseEntity{
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY,cascade = CascadeType.PERSIST)
     private Expert expert;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY,cascade = CascadeType.PERSIST)
     private UnderService underService;
 
-    @ManyToOne
+    @ManyToOne(fetch=FetchType.LAZY,cascade = CascadeType.PERSIST)
     private Customer customer;
 
     private double proposedPrice;

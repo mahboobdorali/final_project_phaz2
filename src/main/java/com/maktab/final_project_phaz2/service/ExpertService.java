@@ -53,6 +53,11 @@ public class ExpertService {
 
     public Expert findExpertByEmail(String emailAddress) throws NoResultException {
         return expertRepository.findByEmailAddress(emailAddress).
+                orE
+        lseThrow(() -> new NoResultException("this expert dose not exist"));
+    }
+    public Expert findExpertById(Long id) throws NoResultException {
+        return expertRepository.findById(id).
                 orElseThrow(() -> new NoResultException("this expert dose not exist"));
     }
 
