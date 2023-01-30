@@ -7,6 +7,7 @@ import com.maktab.final_project_phaz2.date.repository.ExpertRepository;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -55,11 +56,13 @@ public class ExpertService {
         return expertRepository.findByEmailAddress(emailAddress).
                 orElseThrow(() -> new NoResultException("this expert dose not exist"));
     }
+
     public Expert findExpertById(Long id) throws NoResultException {
         return expertRepository.findById(id).
                 orElseThrow(() -> new NoResultException("this expert dose not exist"));
     }
 
+    @Transactional
     public Offer OfferAnSubmit(Offer offer) throws NoResultException {
         UnderService underService = new UnderService();
         if (offer.getPriceOffer() < underService.getBasePrice())

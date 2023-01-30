@@ -5,12 +5,17 @@ import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.date.repository.CustomerRepository;
 import com.maktab.final_project_phaz2.date.repository.OfferRepository;
+import com.maktab.final_project_phaz2.exception.InputInvalidException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +26,8 @@ public class CustomerService {
     private final OfferService offerService;
     private final ServiceUnderService underService;
     private final MainTaskService mainTaskService;
+
+    private final ExpertService expertService;
 
     public void registerCustomer(Customer customer) {
         customerRepository.save(customer);
@@ -51,6 +58,11 @@ public class CustomerService {
                 orElseThrow(() -> new NoResultException("this customer dose not exist"));
     }
 
+    public Customer findCustomerById(Long id) throws NoResultException {
+        return customerRepository.findById(id).
+                orElseThrow(() -> new NoResultException("this customer dose not exist"));
+    }
+
     public void changePassword(String emailAddress, String oldPassword, String newPassword) throws NoResultException {
         Customer customer = customerRepository.findByEmailAddress(emailAddress).
                 orElseThrow(() -> new NoResultException(" this customer dose not exist"));
@@ -68,6 +80,7 @@ public class CustomerService {
         return mainTaskService.findServiceByName(nameOfService);
     }
 
+
     public OrderCustomer Order(OrderCustomer ordersCustomer, Long idOfChoiceUnderService) throws NoResultException {
         UnderService serviceById = underService.findUnderServiceById(idOfChoiceUnderService);
         if (ordersCustomer.getProposedPrice() < serviceById.getBasePrice())
@@ -79,28 +92,50 @@ public class CustomerService {
         return ordersCustomer;
     }
 
-    public List<Offer> sortByPrice(OrderCustomer orderCustomer) {
-        return offerRepository.findAllByOrdersCustomer(orderCustomer, Sort.by(Sort.Direction.DESC, "priceOffer"));
+    public List<Offer> sortByPrice(Long idOrderCustomer) throws NoResultException {
+        OrderCustomer orderCustomer = orderService.findOrderById(idOrderCustomer);
+        List<Offer> priceOffer = offerRepository.findAllByOrdersCustomer(orderCustomer, Sort.by(Sort.Direction.ASC, "priceOffer"));
+        return offerRepository.saveAll(priceOffer);
     }
 
 
-    public void selectExpertByCustomer(Offer offer) {
-        offer.getOrdersCustomer().
+    public Offer selectOfferByCustomer(Long idForChoiceOffer) throws NoResultException {
+        Offer offerServiceById = offerService.findById(idForChoiceOffer);
+        offerServiceById.getOrdersCustomer().
                 setCurrentSituation(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION_TO_COME);
-        offerService.updateOffer(offer);
+        return offerService.updateOffer(offerServiceById);
     }
 
-    public void changeSituationByCustomer(Long id) throws NoResultException {
-        Offer offerId = offerService.findById(id);
-        if (!(offerId.getOrdersCustomer().getCurrentSituation().equals(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION_TO_COME)))
-            throw new NoResultException("please first select your expert");
+    @Transactional
+    public Offer changeSituationByCustomer(Long idForChoiceOffer, Long idOrder) throws NoResultException {
+        Offer offerId = offerService.findById(idForChoiceOffer);
+        OrderCustomer orderById = orderService.findOrderById(idOrder);
+        if (offerId.getTimeProposeToStartWork().before(orderById.getDateAndTimeOfWork()))
+            throw new NoResultException("time has not come to do the work!!");
         offerId.getOrdersCustomer().setCurrentSituation(CurrentSituation.STARTED);
-        offerService.updateOffer(offerId);
+        return offerService.updateOffer(offerId);
     }
 
-    public void changeSituationToFinish(Long id) throws NoResultException {
-        Offer offerById = offerService.findById(id);
-        offerById.getOrdersCustomer().setCurrentSituation(CurrentSituation.DONE);
-        offerService.updateOffer(offerById);
+    public Expert paidForExpert(Long idChoiceOffer, String emailCustomer, String emailAddress) throws NoResultException, InputInvalidException {
+        Offer offerById = offerService.findById(idChoiceOffer);
+        Customer customerByEmail = findCustomerByEmail(emailCustomer);
+        Expert expertByEmail = expertService.findExpertByEmail(emailAddress);
+        if (offerById.getPriceOffer() > customerByEmail.getAmount())
+            throw new RuntimeException("price offer is more than stock!!");
+        customerByEmail.setAmount(customerByEmail.getAmount() - offerById.getPriceOffer());
+        expertByEmail.setAmount(expertByEmail.getAmount() + offerById.getPriceOffer());
+        offerById.getOrdersCustomer().setCurrentSituation(CurrentSituation.PAID);
+        offerService.saveAllOffer(offerById);
+        registerCustomer(customerByEmail);
+        return expertService.updateExpert(expertByEmail);
+    }
+
+    public Offer changeSituationForFinish(Long id) throws NoResultException {
+        Offer offer = offerService.findById(id);
+        if (!offer.getOrdersCustomer().getCurrentSituation().equals(CurrentSituation.PAID))
+            throw new NoResultException("please pay the expert fee first!!");
+        offer.getOrdersCustomer().setCurrentSituation(CurrentSituation.DONE);
+        return offerService.updateOffer(offer);
+
     }
 }
