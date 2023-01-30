@@ -79,13 +79,6 @@ class OrderServiceTest {
         org.assertj.core.api.Assertions.assertThat(orderById.getProposedPrice()).isEqualTo(170000);
 
     }
-    /*@Test
-    @Order(4)
-    void sortPriceTest() {
-        List<Offer> offerList = customerService.sortByPrice(orderCustomer);
-        assertEquals(10000000, offerList.get(1).getPriceOffer());
-        assertEquals(20000000, offerList.get(2).getPriceOffer());
-    }*/
 
     @Test
     @Order(5)

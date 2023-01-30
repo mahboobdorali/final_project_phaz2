@@ -4,6 +4,7 @@ import com.maktab.final_project_phaz2.Util.DateUtil;
 import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 
+import com.maktab.final_project_phaz2.exception.InputInvalidException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
@@ -22,6 +23,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(SpringRunner.class)
@@ -29,33 +31,83 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class OfferServiceTest {
     @Autowired
-    private OfferService offerService;
+    private OrderService orderService;
     @Autowired
     private ExpertService expertService;
+    @Autowired
+    private CustomerService customerService;
 
-    LocalDateTime localDate = LocalDateTime.of(2024, 2, 26, 5, 15, 12);
-    LocalDateTime localDateCustomer = LocalDateTime.of(2025, 4, 6, 8, 19);
+    LocalDateTime localDate = LocalDateTime.of(2023, 3, 2, 6, 15, 12);
     Date timeToStartWork = DateUtil.changeLocalDateToDate(localDate);
-    Date offerTimeToStartWork = DateUtil.changeLocalDateToDate(localDateCustomer);
-    CustomerAddress customerAddress = CustomerAddress.builder().city("ben").plaque("6").street("janbazan").build();
-    OrderCustomer orderCustomer = OrderCustomer.builder().proposedPrice(90000).jobDescription("washin carpet").dateAndTimeOfWork(offerTimeToStartWork).customerAddress(customerAddress).currentSituation(CurrentSituation.WAITING_FOR_EXPERT_ADVICE).build();
-    Offer offer = Offer.builder().priceOffer(70000).ordersCustomer(orderCustomer).durationOfWork(Duration.of(2, ChronoUnit.HOURS)).TimeProposeToStartWork(timeToStartWork).build();
+    Offer offer = Offer.builder().priceOffer(170000).ordersCustomer(null).durationOfWork(Duration.of(2, ChronoUnit.HOURS)).TimeProposeToStartWork(timeToStartWork).build();
 
-      @BeforeAll
-      static void setup(@Autowired DataSource dataSource) {
-          try (Connection connection = dataSource.getConnection()) {
-              ScriptUtils.executeSqlScript(connection, new ClassPathResource("OfferServiceData.sql"));
-          } catch (SQLException e) {
-              e.printStackTrace();
-          }
-      }
+
+    LocalDateTime localDateCustomer2 = LocalDateTime.of(2023, 11, 9, 8, 19);
+    Date timeToStartWork2 = DateUtil.changeLocalDateToDate(localDateCustomer2);
+    Offer offer2 = Offer.builder().priceOffer(70000).ordersCustomer(null).durationOfWork(Duration.of(1, ChronoUnit.HOURS)).TimeProposeToStartWork(timeToStartWork2).build();
+
+
+    @BeforeAll
+    static void setup(@Autowired DataSource dataSource) {
+        try (Connection connection = dataSource.getConnection()) {
+            ScriptUtils.executeSqlScript(connection, new ClassPathResource("OfferServiceData.sql"));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Test
     @Order(1)
     void registerOffer() throws NoResultException {
         CurrentSituation currentSituation = CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION;
+        OrderCustomer orderById = orderService.findOrderById(1L);
+        offer.setOrdersCustomer(orderById);
         Offer offer1 = expertService.OfferAnSubmit(offer);
+        offer2.setOrdersCustomer(orderById);
+        expertService.OfferAnSubmit(offer2);
         assertEquals(offer1.getOrdersCustomer().getCurrentSituation(), currentSituation);
+        assertEquals(offer2.getOrdersCustomer().getCurrentSituation(), currentSituation);
     }
+
+    @Test
+    @Order(2)
+    void sortPriceTest() throws NoResultException {
+        List<Offer> offerList = customerService.sortByPrice(1L);
+        assertEquals(170000, offerList.get(1).getPriceOffer());
+        assertEquals(70000, offerList.get(0).getPriceOffer());
+    }
+
+    @Test
+    @Order(3)
+    void choiceOfferByCustomerTest() throws NoResultException {
+        CurrentSituation currentSituation = CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION_TO_COME;
+        Offer offerByCustomer = customerService.selectOfferByCustomer(1L);
+        assertEquals(offerByCustomer.getOrdersCustomer().getCurrentSituation(), currentSituation);
+    }
+
+    @Test
+    @Order(4)
+    void paidMoneyToExpertTest() throws NoResultException, InputInvalidException {
+        Expert expert = customerService.paidForExpert(1L, "mona@gmail.com", "zahra@gmail.com");
+        assertEquals(expert.getAmount(), 200000);
+    }
+
+    @Test
+    @Order(5)
+    void changeSituationTest() throws NoResultException {
+        Offer offer1 = customerService.changeSituationForFinish(1L);
+        CurrentSituation currentSituation = CurrentSituation.DONE;
+        assertEquals(offer1.getOrdersCustomer().getCurrentSituation(), currentSituation);
+
+    }
+
+   /* @Test
+    @Order(5)
+    void changeOrderModeTest() throws NoResultException {
+        Offer offerForChangeSituation = customerService.changeSituationByCustomer(1L,1L);
+        CurrentSituation currentSituation = CurrentSituation.STARTED;
+        assertEquals(offerForChangeSituation.getOrdersCustomer().getCurrentSituation(), currentSituation);
+    }*/
 
    /* @Test
     @Order(2)
