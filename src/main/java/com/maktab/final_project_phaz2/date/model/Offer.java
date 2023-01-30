@@ -23,14 +23,14 @@ public class Offer extends BaseEntity {
     @ManyToOne(cascade = CascadeType.PERSIST,fetch = FetchType.LAZY)
     private Expert expert;
 
-    @ManyToOne(cascade = CascadeType.PERSIST,fetch = FetchType.EAGER)
+    @ManyToOne(cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
     private OrderCustomer ordersCustomer;
 
     private double priceOffer;
 
     private Duration durationOfWork;
 
-    @Temporal(value = TemporalType.TIME)
+    @Temporal(value = TemporalType.TIMESTAMP)
     private Date TimeProposeToStartWork;
 
     public Offer(Long id, Date dateAndTimeRegistrationOfOffer, Expert expert, OrderCustomer ordersCustomer, double priceOffer, Duration durationOfWork, Date timeProposeToStartWork) {

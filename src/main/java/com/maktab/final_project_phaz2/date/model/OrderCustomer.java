@@ -4,7 +4,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 @Getter
 @Setter
 @ToString
@@ -14,6 +17,12 @@ import java.util.Date;
 @SuperBuilder
 public class OrderCustomer extends BaseEntity{
 
+
+
+
+   /* @OneToMany(cascade = CascadeType.MERGE,fetch = FetchType.EAGER,mappedBy ="ordersCustomer" )
+    private List<Offer> offerList=new ArrayList<>();
+*/
     @ManyToOne(fetch=FetchType.LAZY,cascade = CascadeType.PERSIST)
     private Expert expert;
 
