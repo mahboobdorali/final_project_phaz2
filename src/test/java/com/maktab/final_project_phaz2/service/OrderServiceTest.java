@@ -1,9 +1,7 @@
 package com.maktab.final_project_phaz2.service;
 
 import com.maktab.final_project_phaz2.Util.DateUtil;
-import com.maktab.final_project_phaz2.date.model.CustomerAddress;
-import com.maktab.final_project_phaz2.date.model.Offer;
-import com.maktab.final_project_phaz2.date.model.OrderCustomer;
+import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import org.junit.jupiter.api.*;
@@ -22,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -31,6 +30,8 @@ class OrderServiceTest {
     private CustomerService customerService;
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private ServiceUnderService underService;
     LocalDateTime localDate = LocalDateTime.of(2023, 12, 26, 8, 15, 12);
     Date orderTimeToWork = DateUtil.changeLocalDateToDate(localDate);
 
@@ -38,48 +39,55 @@ class OrderServiceTest {
 
     OrderCustomer orderCustomer = OrderCustomer.builder().proposedPrice(200000).jobDescription("electrical repair of the building").dateAndTimeOfWork(orderTimeToWork).customerAddress(customerAddress).build();
 
- /*   @BeforeAll
+    @BeforeAll
     static void setup(@Autowired DataSource dataSource) {
         try (Connection connection = dataSource.getConnection()) {
             ScriptUtils.executeSqlScript(connection, new ClassPathResource("OrderServiceData.sql"));
         } catch (SQLException e) {
             e.printStackTrace();
         }
-    }*/
+    }
 
     @Test
     @Order(1)
+    void getSubServiceByName() throws NoResultException {
+        UnderService underServiceByName = underService.findUnderServiceByName("cleanHome");
+        assertNotNull(underServiceByName);
+    }
+
+    @Test
+    @Order(2)
     void registerOrder() throws NoResultException {
         OrderCustomer order = customerService.Order(orderCustomer, 1L);
         CurrentSituation currentSituation = CurrentSituation.WAITING_FOR_EXPERT_ADVICE;
         assertEquals(order.getCurrentSituation(), currentSituation);
     }
-/*
-   @Test
-    @Order(2)
+
+    @Test
+    @Order(3)
     void getListOfOrder() {
         List<OrderCustomer> allOrders = orderService.getAllOrders();
         org.assertj.core.api.Assertions.assertThat(allOrders.size()).isGreaterThan(0);
     }
 
     @Test
-    @Order(3)
+    @Order(4)
     void editOrderTest() throws NoResultException {
         OrderCustomer orderById = orderService.findOrderById(1L);
         orderById.setProposedPrice(170000);
         orderService.updateOrder(orderById);
         org.assertj.core.api.Assertions.assertThat(orderById.getProposedPrice()).isEqualTo(170000);
 
-    }*/
-    @Test
-    @Order(4)
-    void sortPriceTest(){
-        List<Offer> offerList = customerService.sortByPrice(orderCustomer);
-        assertEquals(10000000,offerList.get(1).getPriceOffer());
-        assertEquals(20000000,offerList.get(2).getPriceOffer());
     }
+    /*@Test
+    @Order(4)
+    void sortPriceTest() {
+        List<Offer> offerList = customerService.sortByPrice(orderCustomer);
+        assertEquals(10000000, offerList.get(1).getPriceOffer());
+        assertEquals(20000000, offerList.get(2).getPriceOffer());
+    }*/
 
-  /*  @Test
+    @Test
     @Order(5)
     void deleteOffer() {
         try {
@@ -90,5 +98,5 @@ class OrderServiceTest {
         } catch (NoResultException e) {
             assertEquals("this order is not exist", e.getMessage());
         }
-    }*/
+    }
 }

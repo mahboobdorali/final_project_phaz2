@@ -59,7 +59,7 @@ class CustomerServiceTest {
 
     @Test
     @Order(3)
-    void findExpertByEmail() throws NoResultException {
+    void findCustomerByEmail() throws NoResultException {
         Customer customerFind = customerService.findCustomerByEmail(customer.getEmailAddress());
         assertNotNull(customerFind);
     }
@@ -72,7 +72,7 @@ class CustomerServiceTest {
 
     @Test
     @Order(5)
-    void updateExpertTest() throws NoResultException {
+    void updateCustomerTest() throws NoResultException {
         Customer customerFind = customerService.findCustomerByEmail(customer.getEmailAddress());
         customerFind.setEmailAddress("nahid@gmail.com");
         Customer customer1 = customerService.updateCustomer(customerFind);

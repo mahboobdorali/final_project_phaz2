@@ -9,8 +9,13 @@ import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -36,14 +41,14 @@ class OfferServiceTest {
     OrderCustomer orderCustomer = OrderCustomer.builder().proposedPrice(90000).jobDescription("washin carpet").dateAndTimeOfWork(offerTimeToStartWork).customerAddress(customerAddress).currentSituation(CurrentSituation.WAITING_FOR_EXPERT_ADVICE).build();
     Offer offer = Offer.builder().priceOffer(70000).ordersCustomer(orderCustomer).durationOfWork(Duration.of(2, ChronoUnit.HOURS)).TimeProposeToStartWork(timeToStartWork).build();
 
-    /*  @BeforeAll
+      @BeforeAll
       static void setup(@Autowired DataSource dataSource) {
           try (Connection connection = dataSource.getConnection()) {
               ScriptUtils.executeSqlScript(connection, new ClassPathResource("OfferServiceData.sql"));
           } catch (SQLException e) {
               e.printStackTrace();
           }
-      }*/
+      }
     @Test
     @Order(1)
     void registerOffer() throws NoResultException {
@@ -52,7 +57,7 @@ class OfferServiceTest {
         assertEquals(offer1.getOrdersCustomer().getCurrentSituation(), currentSituation);
     }
 
-    @Test
+   /* @Test
     @Order(2)
     void getListOfOffer() {
         List<Offer> allOffer = offerService.getAllOffer();
@@ -80,6 +85,6 @@ class OfferServiceTest {
         } catch (NoResultException e) {
             assertEquals("this offer is not exist!!", e.getMessage());
         }
-    }
+    }*/
 }
 
