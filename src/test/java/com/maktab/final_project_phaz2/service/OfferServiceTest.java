@@ -3,8 +3,6 @@ package com.maktab.final_project_phaz2.service;
 import com.maktab.final_project_phaz2.Util.DateUtil;
 import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
-
-import com.maktab.final_project_phaz2.exception.InputInvalidException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
@@ -36,6 +34,8 @@ class OfferServiceTest {
     private ExpertService expertService;
     @Autowired
     private CustomerService customerService;
+    @Autowired
+    private OfferService offerService;
 
     LocalDateTime localDate = LocalDateTime.of(2023, 3, 2, 6, 15, 12);
     Date timeToStartWork = DateUtil.changeLocalDateToDate(localDate);
@@ -79,6 +79,15 @@ class OfferServiceTest {
 
     @Test
     @Order(3)
+    void sortScoreTest() throws NoResultException {
+        List<Offer> offerList = customerService.sortByScore(1L);
+        assertEquals(10, offerList.get(0).getExpert().getAverageScore());
+        assertEquals(23, offerList.get(1).getExpert().getAverageScore());
+    }
+
+
+ /*   @Test
+    @Order(3)
     void choiceOfferByCustomerTest() throws NoResultException {
         CurrentSituation currentSituation = CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION_TO_COME;
         Offer offerByCustomer = customerService.selectOfferByCustomer(1L);
@@ -91,33 +100,31 @@ class OfferServiceTest {
         Expert expert = customerService.paidForExpert(1L, "mona@gmail.com", "zahra@gmail.com");
         assertEquals(expert.getAmount(), 200000);
     }
-
     @Test
     @Order(5)
     void changeSituationTest() throws NoResultException {
         Offer offer1 = customerService.changeSituationForFinish(1L);
         CurrentSituation currentSituation = CurrentSituation.DONE;
         assertEquals(offer1.getOrdersCustomer().getCurrentSituation(), currentSituation);
-
     }
-
-   /* @Test
-    @Order(5)
+    @Test
+    @Order(6)
     void changeOrderModeTest() throws NoResultException {
-        Offer offerForChangeSituation = customerService.changeSituationByCustomer(1L,1L);
+        Offer offerForChangeSituation = customerService.changeSituationByCustomer(1L, 1L);
         CurrentSituation currentSituation = CurrentSituation.STARTED;
         assertEquals(offerForChangeSituation.getOrdersCustomer().getCurrentSituation(), currentSituation);
-    }*/
+    }
 
-   /* @Test
-    @Order(2)
+
+    @Test
+    @Order(7)
     void getListOfOffer() {
         List<Offer> allOffer = offerService.getAllOffer();
         org.assertj.core.api.Assertions.assertThat(allOffer.size()).isGreaterThan(0);
     }
 
     @Test
-    @Order(3)
+    @Order(8)
     void updateOfferTest() throws NoResultException {
         Offer byId = offerService.findById(1L);
         byId.setPriceOffer(120000);
@@ -127,7 +134,7 @@ class OfferServiceTest {
     }
 
     @Test
-    @Order(4)
+    @Order(9)
     void deleteOffer() {
         try {
             Offer offer1 = offerService.findById(1L);

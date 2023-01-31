@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.*;
 import java.util.List;
 
 @Service
@@ -86,5 +87,32 @@ public class ExpertService {
             throw new NoResultException("your state is not safe");
     }
 
+    public Expert saveImage(String emailExpert) throws NoResultException {
+        Expert expertByEmail = findExpertByEmail(emailExpert);
+        File file = new File("D:\\java\\final-project\\final_project_phaz2\\src\\main\\java\\com\\maktab\\final_project_phaz2\\date\\man22.jpg");
+        byte[] file1 = new byte[(int) file.length()];
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            fileInputStream.read(file1);
+            fileInputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        expertByEmail.setImage(file1);
+        registerExpert(expertByEmail);
+        return expertByEmail;
+    }
+
+    public void getImage(String expertEmail) throws NoResultException {
+        Expert expertByEmail = findExpertByEmail(expertEmail);
+        byte[] image = expertByEmail.getImage();
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream("D:\\java\\final-project\\final_project_phaz2\\src\\main\\java\\com\\maktab\\final_project_phaz2\\date\\image.jpg");
+            fileOutputStream.write(image);
+            fileOutputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 

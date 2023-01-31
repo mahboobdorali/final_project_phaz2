@@ -1,5 +1,6 @@
 
 package com.maktab.final_project_phaz2.service;
+
 import com.maktab.final_project_phaz2.date.model.MainTask;
 import com.maktab.final_project_phaz2.exception.DuplicateEntryException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
@@ -20,8 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MainTaskTest {
     @Autowired
     private MainTaskService mainTaskService;
-    @Autowired
-    private AdminService adminService;
+
     MainTask mainTask = MainTask.builder().name("home").build();
     MainTask mainTask1 = MainTask.builder().name("room").build();
 

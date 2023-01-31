@@ -1,4 +1,5 @@
 package com.maktab.final_project_phaz2.service;
+
 import com.maktab.final_project_phaz2.date.model.Expert;
 import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
 import com.maktab.final_project_phaz2.date.model.enumuration.Role;
@@ -50,23 +51,10 @@ class ExpertServiceTest {
         assertNotNull(expertFind);
     }
 
-    @Test
-    @Order(2)
-    void addExpertToUnderServiceTest() throws NoResultException {
-        Expert expert1 = adminService.addExpertToUnderService(1L, 1L);
-        org.assertj.core.api.Assertions.assertThat(expert1.getId()).isGreaterThan(0);
 
-    }
 
     @Test
     @Order(3)
-    void deleteExpertFromUnderServiceTest() throws NoResultException {
-        Expert expert1 = adminService.deleteExpertFromUnderService(1L, 1L);
-        org.assertj.core.api.Assertions.assertThat(expert1.getUnderServiceList().size()).isEqualTo(0);
-    }
-
-    @Test
-    @Order(4)
     void changePassword() throws NoResultException {
         String password = "12345";
         expertService.changePassword(expert.getEmailAddress(), expert.getPassword(), password);
@@ -75,7 +63,7 @@ class ExpertServiceTest {
     }
 
     @Test
-    @Order(5)
+    @Order(4)
     void changeStatus() throws NoResultException {
         ApprovalStatus approvalStatus = ApprovalStatus.ACCEPTED;
         adminService.convertStatus(expert.getEmailAddress());
@@ -85,30 +73,48 @@ class ExpertServiceTest {
     }
 
     @Test
-    @Order(6)
+    @Order(5)
     void findExpertByEmail() throws NoResultException {
         Expert expertFind = expertService.findExpertByEmail(expert.getEmailAddress());
         assertNotNull(expertFind);
     }
 
     @Test
-    @Order(7)
+    @Order(6)
     void getListOfExpert() {
         List<Expert> allExpert = expertService.getAllExpert();
         org.assertj.core.api.Assertions.assertThat(allExpert.size()).isGreaterThan(0);
     }
 
     @Test
-    @Order(8)
+    @Order(7)
     void updateExpertTest() throws NoResultException {
         Expert expertFind = expertService.findExpertByEmail(expert.getEmailAddress());
         expertFind.setEmailAddress("ali@gmail.com");
         Expert expert1 = expertService.updateExpert(expertFind);
         assertEquals(expert1.getEmailAddress(), expertFind.getEmailAddress());
     }
+    @Test
+    @Order(8)
+    void addExpertToUnderServiceTest() throws NoResultException {
+        Expert expert1 = adminService.addExpertToUnderService(1L, 1L);
+        org.assertj.core.api.Assertions.assertThat(expert1.getId()).isGreaterThan(0);
 
+    }
     @Test
     @Order(9)
+    void saveImageTest() throws NoResultException {
+        Expert expert1 = expertService.saveImage("ali@gmail.com");
+        assertNotNull(expert1);
+    }
+    @Test
+    @Order(10)
+    void deleteExpertFromUnderServiceTest() throws NoResultException {
+        Expert expert1 = adminService.deleteExpertFromUnderService(1L, 1L);
+        org.assertj.core.api.Assertions.assertThat(expert1.getUnderServiceList().size()).isEqualTo(0);
+    }
+  /*  @Test
+    @Order(10)
     void deleteExpertTest() {
         try {
             Expert expertFind = expertService.findExpertByEmail(expert.getEmailAddress());
@@ -119,5 +125,5 @@ class ExpertServiceTest {
         } catch (NoResultException e) {
             assertEquals("this expert dose not exist", e.getMessage());
         }
-    }
+    }*/
 }

@@ -21,7 +21,6 @@ public class Expert extends Person implements Serializable {
     private double averageScore;
 
     @Lob
-//    @Column(nullable = false)
     private byte[] image;
 
     @Enumerated(EnumType.STRING)
