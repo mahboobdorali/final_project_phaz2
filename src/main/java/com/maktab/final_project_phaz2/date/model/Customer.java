@@ -22,7 +22,10 @@ public class Customer extends Person implements Serializable {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer",cascade = CascadeType.PERSIST)
     private List<OrderCustomer> orderCustomerList=new ArrayList<>();
 
-    public Customer(String name, String family, String emailAddress, String password, Role role, Date dateAndTimeOfRegistration, double amount, List<OrderCustomer> orderCustomerList) {
+    public Customer(String name, String family, String emailAddress,
+                    String password, Role role,
+                    Date dateAndTimeOfRegistration,
+                    double amount, List<OrderCustomer> orderCustomerList) {
         super(name, family, emailAddress, password, role, dateAndTimeOfRegistration, amount);
         this.orderCustomerList = orderCustomerList;
     }

@@ -17,12 +17,6 @@ import java.util.List;
 @SuperBuilder
 public class OrderCustomer extends BaseEntity{
 
-
-
-
-   /* @OneToMany(cascade = CascadeType.MERGE,fetch = FetchType.EAGER,mappedBy ="ordersCustomer" )
-    private List<Offer> offerList=new ArrayList<>();
-*/
     @ManyToOne(fetch=FetchType.LAZY,cascade = CascadeType.PERSIST)
     private Expert expert;
 

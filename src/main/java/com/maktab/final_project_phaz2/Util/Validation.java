@@ -10,7 +10,7 @@ public class Validation {
     }
 
     public static void passwordIsValid(String password) throws InputInvalidException {
-        if (!password.equals("") && password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[@#$%&])(?=\\S+$).{8}$"))
+        if (!password.equals("") && password.matches("^(?=.*[0-9])(?=.*[a-z])(?=\\S+$).{8}$"))
             return;
         throw new InputInvalidException("your password must be a combination of letters and numbers with " +
                 "a length 8!!");

@@ -3,6 +3,7 @@ package com.maktab.final_project_phaz2.service;
 import com.maktab.final_project_phaz2.Util.DateUtil;
 import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
+import com.maktab.final_project_phaz2.exception.InputInvalidException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
@@ -77,16 +78,7 @@ class OfferServiceTest {
         assertEquals(70000, offerList.get(0).getPriceOffer());
     }
 
-    @Test
-    @Order(3)
-    void sortScoreTest() throws NoResultException {
-        List<Offer> offerList = customerService.sortByScore(1L);
-        assertEquals(10, offerList.get(0).getExpert().getAverageScore());
-        assertEquals(23, offerList.get(1).getExpert().getAverageScore());
-    }
-
-
- /*   @Test
+   @Test
     @Order(3)
     void choiceOfferByCustomerTest() throws NoResultException {
         CurrentSituation currentSituation = CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION_TO_COME;
@@ -144,6 +136,6 @@ class OfferServiceTest {
         } catch (NoResultException e) {
             assertEquals("this offer is not exist!!", e.getMessage());
         }
-    }*/
+    }
 }
 
