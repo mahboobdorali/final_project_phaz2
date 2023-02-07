@@ -17,6 +17,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ServiceUnderService {
     private final UnderServiceRepository underServiceRepository;
+    private final MainTaskService mainTaskService;
 
     public void saveAllUnderService(UnderService underService) {
 
@@ -32,16 +33,26 @@ public class ServiceUnderService {
 
         return underServiceRepository.findAll();
     }
-    public UnderService addUnderServiceByAdmin(UnderService underService) throws DuplicateEntryException {
+
+    public UnderService addUnderServiceByAdmin(UnderService underService, Long serviceId) {
         Optional<UnderService> byNameSubService = underServiceRepository.findByNameSubService(underService.getNameSubService());
+        MainTask serviceById = mainTaskService.findServiceById(serviceId);
         if (byNameSubService.isPresent())
             throw new DuplicateEntryException("this UnderService already exist");
+        underService.setMainTask(serviceById);
         return underServiceRepository.save(underService);
     }
-    public UnderService findUnderServiceByName(String underServiceName) throws NoResultException {
+
+    public UnderService findUnderServiceByName(String underServiceName) {
         return underServiceRepository.findByNameSubService(underServiceName).orElseThrow(() -> new NoResultException("this underService is not exist"));
     }
-    public UnderService findUnderServiceById(Long id) throws NoResultException {
+
+    public UnderService findUnderServiceById(Long id) {
         return underServiceRepository.findById(id).orElseThrow(() -> new NoResultException("this underService is not exist"));
+    }
+
+    public List<UnderService> showAllUnderServiceByServiceByCustomer(String name) {
+        mainTaskService.findServiceByName(name);
+        return underServiceRepository.findUnderService(name);
     }
 }

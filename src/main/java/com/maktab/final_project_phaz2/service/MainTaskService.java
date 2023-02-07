@@ -31,20 +31,23 @@ public class MainTaskService {
 
         return serviceRepository.save(mainTask);
     }
+
     public List<MainTask> getAllService() {
         return serviceRepository.findAll();
     }
 
-    public MainTask addServiceByAdmin(MainTask mainTask) throws DuplicateEntryException {
+    public MainTask addServiceByAdmin(MainTask mainTask) {
         Optional<MainTask> byName = serviceRepository.findByName(mainTask.getName());
         if (byName.isPresent())
             throw new DuplicateEntryException("this service already exist");
         return serviceRepository.save(mainTask);
     }
-    public MainTask findServiceByName(String serviceName) throws NoResultException {
+
+    public MainTask findServiceByName(String serviceName) {
         return serviceRepository.findByName(serviceName).orElseThrow(() -> new NoResultException("this service is not exist"));
     }
-    public MainTask findServiceById(Long id) throws NoResultException {
+
+    public MainTask findServiceById(Long id) {
         return serviceRepository.findById(id).orElseThrow(() -> new NoResultException("this service is not exist"));
     }
 }

@@ -17,13 +17,16 @@ import java.util.List;
 public class ExpertService {
     private final ExpertRepository expertRepository;
     private final OfferService offerService;
+    private final OrderService orderService;
+    private final ServiceUnderService underService;
 
     public void registerExpert(Expert expert) {
         expertRepository.save(expert);
     }
 
     public void deleteExpert(Expert expert) {
-        expertRepository.delete(expert);
+        Expert expertByEmail = findExpertByEmail(expert.getEmailAddress());
+        expertRepository.delete(expertByEmail);
     }
 
     public Expert updateExpert(Expert expert) {
@@ -36,7 +39,7 @@ public class ExpertService {
         return expertRepository.findAll();
     }
 
-    public Expert logInExpert(String emailAddress, String password) throws NoResultException {
+    public Expert logInExpert(String emailAddress, String password) {
         Expert expert = expertRepository.findByEmailAddress(emailAddress).
                 orElseThrow(() -> new NoResultException(" this customer dose not exist"));
         if (!(expert.getPassword().equals(password)))
@@ -44,7 +47,7 @@ public class ExpertService {
         return expert;
     }
 
-    public void changePassword(String emailAddress, String oldPassword, String newPassword) throws NoResultException {
+    public void changePassword(String emailAddress, String oldPassword, String newPassword) {
         Expert expert = expertRepository.findByEmailAddress(emailAddress).
                 orElseThrow(() -> new NoResultException(" this customer dose not exist"));
         if (!(expert.getPassword().equals(oldPassword)))
@@ -53,32 +56,34 @@ public class ExpertService {
         expertRepository.save(expert);
     }
 
-    public Expert findExpertByEmail(String emailAddress) throws NoResultException {
+    public Expert findExpertByEmail(String emailAddress) {
         return expertRepository.findByEmailAddress(emailAddress).
                 orElseThrow(() -> new NoResultException("this expert dose not exist"));
     }
 
-    public Expert findExpertById(Long id) throws NoResultException {
+    public Expert findExpertById(Long id) {
         return expertRepository.findById(id).
                 orElseThrow(() -> new NoResultException("this expert dose not exist"));
     }
 
     @Transactional
-    public Offer OfferAnSubmit(Offer offer) throws NoResultException {
-        UnderService underService = new UnderService();
-        if (offer.getPriceOffer() < underService.getBasePrice())
+    public Offer OfferAnSubmit(Offer offer, Long idUnder, Long idOrder) {
+        UnderService underServiceById = underService.findUnderServiceById(idUnder);
+        if (offer.getPriceOffer() < underServiceById.getBasePrice())
             throw new NoResultException("your price  is not available");
         if (DateUtil.isNotDateValid(offer.getTimeProposeToStartWork())) {
             throw new NoResultException("your date is not available");
         }
-        OrderCustomer orderCustomer = offer.getOrdersCustomer();
-        checkSituation(orderCustomer.getCurrentSituation());
-        offer.getOrdersCustomer().setCurrentSituation(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION);
+        OrderCustomer orderById = orderService.findOrderById(idOrder);
+        checkSituation(orderById.getCurrentSituation());
+        orderById.setCurrentSituation(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION);
+        offer.setOrdersCustomer(orderById);
         offerService.saveAllOffer(offer);
         return offer;
     }
 
-    public void checkSituation(CurrentSituation currentSituation) throws NoResultException {
+
+    public void checkSituation(CurrentSituation currentSituation) {
         List<CurrentSituation> currentSituationList = List.of(CurrentSituation.DONE,
                 CurrentSituation.PAID,
                 CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION_TO_COME,
@@ -87,7 +92,14 @@ public class ExpertService {
             throw new NoResultException("your state is not safe");
     }
 
-    public Expert saveImage(String emailExpert) throws NoResultException {
+    @Transactional
+    public void setExpertToOffer(Long idOffer, Long idExpert) {
+        Offer offer = offerService.findById(idOffer);
+        Expert expertById = findExpertById(idExpert);
+        offer.setExpert(expertById);
+    }
+
+    public Expert saveImage(String emailExpert) {
         Expert expertByEmail = findExpertByEmail(emailExpert);
         File file = new File("D:\\java\\final-project\\final_project_phaz2\\src\\main\\java\\com\\maktab\\final_project_phaz2\\date\\man22.jpg");
         byte[] file1 = new byte[(int) file.length()];
@@ -103,7 +115,7 @@ public class ExpertService {
         return expertByEmail;
     }
 
-    public void getImage(String expertEmail) throws NoResultException {
+    public void getImage(String expertEmail) {
         Expert expertByEmail = findExpertByEmail(expertEmail);
         byte[] image = expertByEmail.getImage();
         try {

@@ -1,4 +1,5 @@
 package com.maktab.final_project_phaz2.date.model;
+/*
 
 import jakarta.persistence.Embeddable;
 import lombok.*;
@@ -19,3 +20,4 @@ public class CustomerAddress {
 
     private String plaque;
 }
+*/

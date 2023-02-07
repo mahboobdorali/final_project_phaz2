@@ -32,7 +32,7 @@ public class OfferService {
         return offerRepository.save(offer);
     }
 
-    public Offer findById(Long id) throws NoResultException {
+    public Offer findById(Long id) {
 
         return offerRepository.findById(id).orElseThrow(() -> new NoResultException("this offer is not exist!!"));
     }
