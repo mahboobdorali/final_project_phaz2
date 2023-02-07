@@ -13,9 +13,10 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @ToString
-public class Comments extends BaseEntity {
+public class Opinion extends BaseEntity {
     @ManyToOne
     private Expert expert;
+
     @Column(nullable = false)
     private int score;
 
