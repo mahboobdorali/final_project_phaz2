@@ -1,4 +1,5 @@
 package com.maktab.final_project_phaz2.date.model;
+
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import jakarta.persistence.*;
 import lombok.*;
@@ -15,15 +16,15 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @SuperBuilder
-public class OrderCustomer extends BaseEntity{
+public class OrderCustomer extends BaseEntity {
 
-    @ManyToOne(fetch=FetchType.LAZY,cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Expert expert;
 
-    @ManyToOne(fetch=FetchType.LAZY,cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private UnderService underService;
 
-    @ManyToOne(fetch=FetchType.LAZY,cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Customer customer;
 
     private double proposedPrice;
@@ -33,13 +34,11 @@ public class OrderCustomer extends BaseEntity{
     @Temporal(value = TemporalType.TIMESTAMP)
     private Date dateAndTimeOfWork;
 
-    @Embedded
-    @AttributeOverrides(value ={
-            @AttributeOverride(name="city",column = @Column(nullable = false)),
-            @AttributeOverride(name="plaque",column = @Column(nullable = false))
-    })
+    private String street;
 
-    private CustomerAddress customerAddress;
+    private String city;
+
+    private String plaque;
 
     @Enumerated(EnumType.STRING)
     private CurrentSituation currentSituation;
