@@ -1,8 +1,6 @@
 package com.maktab.final_project_phaz2.controller;
 
-import com.maktab.final_project_phaz2.date.dto.CustomerDto;
-import com.maktab.final_project_phaz2.date.dto.OrderDto;
-import com.maktab.final_project_phaz2.date.dto.ServiceDto;
+import com.maktab.final_project_phaz2.date.dto.*;
 import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import com.maktab.final_project_phaz2.service.CustomerService;
@@ -10,11 +8,11 @@ import com.maktab.final_project_phaz2.service.ServiceUnderService;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/customer")
@@ -32,15 +30,18 @@ public class CustomerController {
     }
 
     @GetMapping("/logIn_customer")
-    public ResponseEntity<Customer> getByEmailAddress(@RequestParam("emailAddress") String emailAddress, @RequestParam("password") String password) throws NoResultException {
-
-        return ResponseEntity.ok().body(customerService.logIn(emailAddress, password));
+    public ResponseEntity<UserDto> getByEmailAddress(@RequestParam("emailAddress") String emailAddress, @RequestParam("password") String password) throws NoResultException {
+        Customer customer = customerService.logIn(emailAddress, password);
+        UserDto sign = mapper.map(customer, UserDto.class);
+        return ResponseEntity.ok().body(sign);
     }
 
     @PutMapping("/update_customer")
-    public ResponseEntity<Customer> update(@RequestBody CustomerDto customerDto) {
+    public ResponseEntity<CustomerDto> update(@RequestBody CustomerDto customerDto) {
         Customer customer = mapper.map(customerDto, Customer.class);
-        return ResponseEntity.ok().body(customerService.updateCustomer(customer));
+        Customer customer1 = customerService.updateCustomer(customer);
+        CustomerDto customerDto1 = mapper.map(customer1, CustomerDto.class);
+        return ResponseEntity.ok().body(customerDto1);
     }
 
     @DeleteMapping("/delete_customer")
@@ -51,42 +52,58 @@ public class CustomerController {
     }
 
     @GetMapping("/getAll_customer")
-    public ResponseEntity<List<Customer>> getAllCustomer() {
-        return ResponseEntity.ok().body(customerService.getAllCustomer());
+    public ResponseEntity<List<UserDto>> getAllCustomer() {
+        return ResponseEntity.ok().body(customerService.getAllCustomer().stream().
+                map(customer -> mapper.map(customer, UserDto.class)).collect(Collectors.toList()));
     }
 
     @GetMapping("/findCustomerById")
-    public ResponseEntity<Customer> getById(@RequestParam("id") @Min(1) Long id) {
-        return ResponseEntity.ok().body(customerService.findCustomerById(id));
+    public ResponseEntity<UserDto> getById(@RequestParam("id") @Min(1) Long id) {
+        Customer customerById = customerService.findCustomerById(id);
+        UserDto userDto = mapper.map(customerById, UserDto.class);
+        return ResponseEntity.ok().body(userDto);
+
     }
 
     @GetMapping("/findCustomerByEmail")
-    public ResponseEntity<Customer> getByEmail(@RequestParam("emailAddress") String emailAddress) {
-        return ResponseEntity.ok().body(customerService.findCustomerByEmail(emailAddress));
+    public ResponseEntity<UserDto> getByEmail(@RequestParam("emailAddress") String emailAddress) {
+        Customer customerByEmail = customerService.findCustomerByEmail(emailAddress);
+        UserDto userDto = mapper.map(customerByEmail, UserDto.class);
+        return ResponseEntity.ok().body(userDto);
     }
 
     @PutMapping("/change_Password")
-    public ResponseEntity<String> changePassword(@RequestParam("emailAddress") String emailAddress, @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword) {
+    public ResponseEntity<String> changePassword(@RequestParam("emailAddress") String emailAddress,
+                                                 @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword) {
         customerService.changePassword(emailAddress, oldPassword, newPassword);
         return ResponseEntity.ok().body("password changed :)");
     }
 
     @PostMapping("/save_order")
     public ResponseEntity<String> saveOrder(@RequestBody OrderDto orderDto, @RequestParam Long idUnderService
-    ,@RequestParam Long idCustomer ) {
+            , @RequestParam Long idCustomer) {
         OrderCustomer orderCustomer = mapper.map(orderDto, OrderCustomer.class);
-        customerService.Order(orderCustomer, idUnderService,idCustomer);
+        customerService.Order(orderCustomer, idUnderService, idCustomer);
         return ResponseEntity.ok().body("this order saved :)");
     }
 
     @GetMapping("/show_mainTask")
-    public ResponseEntity<List<UnderService>> showMainTaskByUnderService(@RequestParam("name") String name) {
-        return ResponseEntity.ok().body(underService.showAllUnderServiceByServiceByCustomer(name));
+    public ResponseEntity<List<UnderServiceDto>> showMainTaskByUnderService(@RequestParam("name") String name) {
+        return ResponseEntity.ok().body(underService.showAllUnderServiceByServiceByCustomer(name).stream().
+                map(underService -> mapper.
+                        map(underService, UnderServiceDto.class)).collect(Collectors.toList()));
     }
 
-    @GetMapping("/sort")
-    public ResponseEntity<List<Offer>> sortOffer(@RequestParam("idOrderCustomer") Long idOrderCustomer) {
-        return ResponseEntity.ok().body(customerService.sortByPrice(idOrderCustomer));
+    @GetMapping("/sortByPrice")
+    public ResponseEntity<List<OfferDto>> sortOfferByPrice(@RequestParam("idOrderCustomer") Long idOrderCustomer) {
+        return ResponseEntity.ok().body(customerService.sortByPrice(idOrderCustomer).stream().map(offer1 -> mapper.
+                map(offer1, OfferDto.class)).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/sortByScore")
+    public ResponseEntity<List<OfferDto>> sortOffer(@RequestParam("idOrderCustomer") Long idOrderCustomer) {
+        return ResponseEntity.ok().body(customerService.sortByScore(idOrderCustomer).stream().map(offer2 -> mapper.
+                map(offer2, OfferDto.class)).collect(Collectors.toList()));
     }
 
     @PutMapping("/selectOffer")

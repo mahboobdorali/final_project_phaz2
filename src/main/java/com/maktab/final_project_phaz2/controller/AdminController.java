@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin")
@@ -26,9 +27,9 @@ public class AdminController {
 
 
     @PostMapping("/add_underService")
-    public ResponseEntity<String> addUnderService(@RequestBody UnderServiceDto underServiceDto,@RequestParam Long idService) {
+    public ResponseEntity<String> addUnderService(@RequestBody UnderServiceDto underServiceDto, @RequestParam Long idService) {
         UnderService underService = mapper.map(underServiceDto, UnderService.class);
-        serviceUnderService.addUnderServiceByAdmin(underService,idService);
+        serviceUnderService.addUnderServiceByAdmin(underService, idService);
         return ResponseEntity.ok().body("**this underService add By admin**");
     }
 
@@ -41,7 +42,7 @@ public class AdminController {
     }
 
     @PutMapping("/change_description")
-    public ResponseEntity<String > changeDescriptionByAdmin( @RequestParam ("idUnderService")Long idUnderService,@RequestParam("newDescription") String newDescription) {
+    public ResponseEntity<String> changeDescriptionByAdmin(@RequestParam("idUnderService") Long idUnderService, @RequestParam("newDescription") String newDescription) {
         adminService.changeDescription(idUnderService, newDescription);
         return ResponseEntity.ok().body("**subService description corrected**");
     }
@@ -53,37 +54,46 @@ public class AdminController {
     }
 
     @GetMapping("/getAll_underService")
-    public ResponseEntity<List<UnderService>> getAllUnderService() {
-        return ResponseEntity.ok().body(serviceUnderService.getAllUnderService());
+    public ResponseEntity<List<UnderServiceDto>> getAllUnderService() {
+        return ResponseEntity.ok().body(serviceUnderService.getAllUnderService().stream().
+                map(underService -> mapper.map(underService, UnderServiceDto.class)).collect(Collectors.toList()));
     }
 
 
     @GetMapping("/getAll_mainService")
-    public ResponseEntity<List<MainTask>> getAllService() {
-        return ResponseEntity.ok().body(mainTaskService.getAllService());
+    public ResponseEntity<List<ServiceDto>> getAllService() {
+        return ResponseEntity.ok().body(mainTaskService.getAllService().stream().
+                map(mainTask -> mapper.map(mainTask, ServiceDto.class)).collect(Collectors.toList()));
     }
 
     @GetMapping("/findSubServiceByName")
-    public ResponseEntity<UnderService> getUnderServiceByName(@RequestParam("underServiceName") String underServiceName) {
-        return ResponseEntity.ok().body(serviceUnderService.findUnderServiceByName(underServiceName));
+    public ResponseEntity<UnderServiceDto> getUnderServiceByName(@RequestParam("underServiceName") String underServiceName) {
+        UnderService underServiceByName = serviceUnderService.findUnderServiceByName(underServiceName);
+        UnderServiceDto underServiceDto = mapper.map(underServiceByName, UnderServiceDto.class);
+        return ResponseEntity.ok().body(underServiceDto);
     }
 
 
-   @GetMapping("/findSubServiceById")
-   public ResponseEntity<UnderService> getUnderServiceById(@RequestParam("id") @Min(1) Long id) {
-       return ResponseEntity.ok().body(serviceUnderService.findUnderServiceById(id));
-   }
+    @GetMapping("/findSubServiceById")
+    public ResponseEntity<UnderServiceDto> getUnderServiceById(@RequestParam("id") @Min(1) Long id) {
+        UnderService underServiceById = serviceUnderService.findUnderServiceById(id);
+        UnderServiceDto underServiceDto = mapper.map(underServiceById, UnderServiceDto.class);
+        return ResponseEntity.ok().body(underServiceDto);
+    }
 
 
     @GetMapping("/findServiceByName")
-    public ResponseEntity<MainTask> getServiceByName(@RequestParam("serviceName") String serviceName) {
-        return ResponseEntity.ok().body(mainTaskService.findServiceByName(serviceName));
+    public ResponseEntity<ServiceDto> getServiceByName(@RequestParam("serviceName") String serviceName) {
+        MainTask serviceByName = mainTaskService.findServiceByName(serviceName);
+        ServiceDto serviceDto = mapper.map(serviceByName, ServiceDto.class);
+        return ResponseEntity.ok().body(serviceDto);
     }
 
-
     @GetMapping("/findServiceById")
-    public ResponseEntity<MainTask> getServiceById(@RequestParam("id") @Min(1) Long id) {
-        return ResponseEntity.ok().body(mainTaskService.findServiceById(id));
+    public ResponseEntity<ServiceDto> getServiceById(@RequestParam("id") @Min(1) Long id) {
+        MainTask serviceById = mainTaskService.findServiceById(id);
+        ServiceDto serviceDto = mapper.map(serviceById, ServiceDto.class);
+        return ResponseEntity.ok().body(serviceDto);
     }
 
 }
