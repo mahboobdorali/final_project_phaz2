@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
-    private final ServiceUnderService underService;
+    private final ServiceUnderService underService1;
 
     public void saveAllOrder(OrderCustomer orderCustomer) {
 
@@ -37,11 +37,12 @@ public class OrderService {
     public OrderCustomer findOrderById(Long id) {
         return orderRepository.findById(id).orElseThrow(() -> new NoResultException("this order is not exist"));
     }
-   /* public List<OrderCustomer>findUnderServiceByOrder(UnderService underService1){
-        UnderService underServiceByName = underService.findUnderServiceByName(underService1.getNameSubService());
-        List<OrderCustomer> allByUnderService = orderRepository.findAllByUnderService(underServiceByName);
-        if(!allByUnderService.equals(CurrentSituation.WAITING_FOR_EXPERT_ADVICE))
-            throw new NoResultException("hhh");
-        return allByUnderService;
-    }*/
+
+    public List<OrderCustomer> findOrderByUnderServiceAndStatus(String name, CurrentSituation status, CurrentSituation status1) {
+         underService1.findUnderServiceByName(name);
+        if (!(status.equals(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION) ||
+                status1.equals(CurrentSituation.WAITING_FOR_EXPERT_OFFER)))
+            throw new NoResultException("your order status is not accepted for ordering!!");
+        return orderRepository.findAllByUnderService(name, status, status1);
+    }
 }

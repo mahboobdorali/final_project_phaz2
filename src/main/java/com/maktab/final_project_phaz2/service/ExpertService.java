@@ -2,7 +2,9 @@ package com.maktab.final_project_phaz2.service;
 
 import com.maktab.final_project_phaz2.Util.DateUtil;
 import com.maktab.final_project_phaz2.date.model.*;
+import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
+import com.maktab.final_project_phaz2.date.model.enumuration.Role;
 import com.maktab.final_project_phaz2.date.repository.ExpertRepository;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,8 @@ public class ExpertService {
     private final ServiceUnderService underService;
 
     public void registerExpert(Expert expert) {
+        expert.setRole(Role.EXPERT);
+        expert.setApprovalStatus(ApprovalStatus.NEW);
         expertRepository.save(expert);
     }
 
@@ -30,8 +34,8 @@ public class ExpertService {
     }
 
     public Expert updateExpert(Expert expert) {
-
-        return expertRepository.save(expert);
+        Expert expertByEmail = findExpertByEmail(expert.getEmailAddress());
+        return expertRepository.save(expertByEmail);
     }
 
     public List<Expert> getAllExpert() {
@@ -77,7 +81,7 @@ public class ExpertService {
         OrderCustomer orderById = orderService.findOrderById(idOrder);
         checkSituation(orderById.getCurrentSituation());
         orderById.setCurrentSituation(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION);
-        offer.setOrdersCustomer(orderById);
+        offer.setOrderCustomer(orderById);
         offerService.saveAllOffer(offer);
         return offer;
     }

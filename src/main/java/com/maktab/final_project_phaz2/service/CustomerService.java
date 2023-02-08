@@ -3,13 +3,11 @@ package com.maktab.final_project_phaz2.service;
 import com.maktab.final_project_phaz2.Util.DateUtil;
 import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
+import com.maktab.final_project_phaz2.date.model.enumuration.Role;
 import com.maktab.final_project_phaz2.date.repository.CustomerRepository;
 import com.maktab.final_project_phaz2.date.repository.OfferRepository;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.validator.internal.util.stereotypes.Lazy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +27,7 @@ public class CustomerService {
     private final ExpertService expertService;
 
     public void registerCustomer(Customer customer) {
+        customer.setRole(Role.CUSTOMER);
         customerRepository.save(customer);
     }
 
@@ -81,7 +80,7 @@ public class CustomerService {
     }
 
     @Transactional
-    public OrderCustomer Order(OrderCustomer ordersCustomer, Long idOfChoiceUnderService,Long idCustomer) {
+    public OrderCustomer Order(OrderCustomer ordersCustomer, Long idOfChoiceUnderService, Long idCustomer) {
         UnderService serviceById = underService.findUnderServiceById(idOfChoiceUnderService);
         Customer customerById = findCustomerById(idCustomer);
         if (ordersCustomer.getProposedPrice() < serviceById.getBasePrice())
@@ -95,9 +94,14 @@ public class CustomerService {
         return ordersCustomer;
     }
 
-    public List<Offer> sortByPrice(Long idOrderCustomer) throws NoResultException {
+    public List<Offer> sortByPrice(Long idOrderCustomer) {
         OrderCustomer orderCustomer = orderService.findOrderById(idOrderCustomer);
-        return offerRepository.findAllByOrdersCustomer(orderCustomer, Sort.by(Sort.Direction.DESC, "priceOffer"));
+        return offerRepository.sortOfferByPriceOffer(orderCustomer);
+    }
+
+    public List<Offer> sortByScore(Long idOrderCustomer) {
+        OrderCustomer orderCustomer = orderService.findOrderById(idOrderCustomer);
+        return offerRepository.sortOfferByScore(orderCustomer);
     }
 
 
@@ -154,7 +158,7 @@ public class CustomerService {
             throw new RuntimeException("price offer is more than stock!!");
         customerByEmail.setAmount(customerByEmail.getAmount() - offerById.getPriceOffer());
         expertByEmail.setAmount(expertByEmail.getAmount() + offerById.getPriceOffer());
-        offerById.getOrdersCustomer().setCurrentSituation(CurrentSituation.PAID);
+        offerById.getOrderCustomer().setCurrentSituation(CurrentSituation.PAID);
         offerService.saveAllOffer(offerById);
         registerCustomer(customerByEmail);
         return expertService.updateExpert(expertByEmail);

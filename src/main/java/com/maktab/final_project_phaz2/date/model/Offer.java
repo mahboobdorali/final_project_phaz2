@@ -24,7 +24,7 @@ public class Offer extends BaseEntity {
     private Expert expert;
 
     @ManyToOne(cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
-    private OrderCustomer ordersCustomer;
+    private OrderCustomer orderCustomer;
 
     private double priceOffer;
 
@@ -33,11 +33,11 @@ public class Offer extends BaseEntity {
     @Temporal(value = TemporalType.TIMESTAMP)
     private Date TimeProposeToStartWork;
 
-    public Offer(Long id, Date dateAndTimeRegistrationOfOffer, Expert expert, OrderCustomer ordersCustomer, double priceOffer, Duration durationOfWork, Date timeProposeToStartWork) {
+    public Offer(Long id, Date dateAndTimeRegistrationOfOffer, Expert expert, OrderCustomer orderCustomer, double priceOffer, Duration durationOfWork, Date timeProposeToStartWork) {
         super(id);
         this.dateAndTimeRegistrationOfOffer = dateAndTimeRegistrationOfOffer;
         this.expert = expert;
-        this.ordersCustomer = ordersCustomer;
+        this.orderCustomer = orderCustomer;
         this.priceOffer = priceOffer;
         this.durationOfWork = durationOfWork;
         TimeProposeToStartWork = timeProposeToStartWork;
