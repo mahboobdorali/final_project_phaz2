@@ -12,13 +12,10 @@ import lombok.*;
 @NoArgsConstructor
 @ToString
 public class UnderServiceDto {
+
     private String nameSubService;
 
     private double basePrice;
 
     private String briefExplanation;
-
-    @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.PERSIST)
-    private MainTask MainTask;
-
 }

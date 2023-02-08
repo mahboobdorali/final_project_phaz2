@@ -16,11 +16,13 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+
 public class OfferDto {
+
     private double priceOffer;
+
      private Duration durationOfWork;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private String timeProposeToStartWork;
-   // @ManyToOne(cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
-    private OrderCustomer orderCustomer;
 }

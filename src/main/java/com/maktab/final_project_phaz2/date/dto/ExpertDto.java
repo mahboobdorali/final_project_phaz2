@@ -19,13 +19,12 @@ public class ExpertDto {
 
     @Pattern(regexp = "^[A-Za-z]{3,29}$")
     private String family;
+
     @Email
     private String emailAddress;
 
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=\\S+$).{8}$")
     private String password;
-
-    private Role role;
 
     private double amount;
 
