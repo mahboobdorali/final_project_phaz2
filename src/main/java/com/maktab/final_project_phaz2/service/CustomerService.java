@@ -2,6 +2,7 @@ package com.maktab.final_project_phaz2.service;
 
 import com.maktab.final_project_phaz2.Util.DateUtil;
 import com.maktab.final_project_phaz2.date.model.*;
+import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.date.model.enumuration.Role;
 import com.maktab.final_project_phaz2.date.repository.CustomerRepository;
@@ -23,7 +24,7 @@ public class CustomerService {
     private final OfferService offerService;
     private final ServiceUnderService underService;
     private final MainTaskService mainTaskService;
-
+    private final OpinionService opinionService;
     private final ExpertService expertService;
 
     public void registerCustomer(Customer customer) {
@@ -80,7 +81,7 @@ public class CustomerService {
     }
 
     @Transactional
-    public OrderCustomer Order(OrderCustomer ordersCustomer, Long idOfChoiceUnderService, Long idCustomer) {
+    public void Order(OrderCustomer ordersCustomer, Long idOfChoiceUnderService, Long idCustomer) {
         UnderService serviceById = underService.findUnderServiceById(idOfChoiceUnderService);
         Customer customerById = findCustomerById(idCustomer);
         if (ordersCustomer.getProposedPrice() < serviceById.getBasePrice())
@@ -91,7 +92,6 @@ public class CustomerService {
         ordersCustomer.setCustomer(customerById);
         ordersCustomer.setUnderService(serviceById);
         orderService.saveAllOrder(ordersCustomer);
-        return ordersCustomer;
     }
 
     public List<Offer> sortByPrice(Long idOrderCustomer) {
@@ -105,11 +105,12 @@ public class CustomerService {
     }
 
 
-    public Offer selectOfferByCustomer(Long idForChoiceOffer, Long idOrder) {
+    public void selectOfferByCustomer(Long idForChoiceOffer, Long idOrder) {
         Offer offerServiceById = offerService.findById(idForChoiceOffer);
         OrderCustomer orderById = orderService.findOrderById(idOrder);
         orderById.setCurrentSituation(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION_TO_COME);
-        return offerService.updateOffer(offerServiceById);
+        orderById.setExpert(offerServiceById.getExpert());
+        offerService.updateOffer(offerServiceById);
     }
 
     public void changeSituationByCustomer(Long idForChoiceOffer, Long idOrder) {
@@ -121,48 +122,52 @@ public class CustomerService {
         offerService.updateOffer(offerId);
     }
 
-    /*public Offer changeSituationForFinish(Long id) {
+    public void changeSituationForFinish(Long id) {
         Offer offer = offerService.findById(id);
-        if (.offer.getTimeProposeToStartWork())
-            throw new NoResultException("you can change the status if the status is on started :)");
-        offer.getOrdersCustomer().setCurrentSituation(CurrentSituation.DONE);
-        return offerService.updateOffer(offer);
-
+        Long differentBetweenTwoDate = DateUtil.differentBetweenTwoDate
+                (offer.getTimeProposeToStartWork(), offer.getOrderCustomer().getWorkDone());
+        if (!differentBetweenTwoDate.equals(offer.getDurationOfWork())) {
+            long number = differentBetweenTwoDate - offer.getDurationOfWork();
+            long numbers = offer.getExpert().getAverageScore() - number;
+            if (numbers < 0)
+                offer.getExpert().setApprovalStatus(ApprovalStatus.NEW);
+            offer.getExpert().setAverageScore(numbers);
+        }
+        offer.getOrderCustomer().setCurrentSituation(CurrentSituation.DONE);
+        offerService.updateOffer(offer);
     }
-*/
 
-   /* @Transactional
-    public void saveComments(Long idExpert, Integer score) {
-        Expert expertByEmail = expertService.findExpertById(idExpert);
-        if (score < 1 || score > 6)
+    public void paymentFromCredit(Long idChoiceOffer, String emailCustomer) {
+        Offer offerById = offerService.findById(idChoiceOffer);
+        Customer customerByEmail = findCustomerByEmail(emailCustomer);
+        if (offerById.getPriceOffer() > customerByEmail.getAmount())
+            throw new RuntimeException("price offer is more than stock!!");
+        customerByEmail.setAmount(customerByEmail.getAmount() - offerById.getPriceOffer());
+        double percent = (offerById.getPriceOffer() / 100) * 70;
+        offerById.getExpert().setAmount(percent);
+        offerById.getOrderCustomer().setCurrentSituation(CurrentSituation.PAID);
+        offerService.saveAllOffer(offerById);
+        registerCustomer(customerByEmail);
+    }
+
+
+    public void saveComments(Long idOffer, Opinion opinion) {
+        Offer byId = offerService.findById(idOffer);
+        if (opinion.getScore() < 1 || opinion.getScore() > 6)
             throw new NoResultException("the score entered must be a number between one and five(1-5");
-        opinion.setScore(score);
-        expertByEmail.getOpinionList().add(opinion);
-        expertService.registerExpert(expertByEmail);
+        opinion.setExpert(byId.getExpert());
+        opinionService.registerOpinion(opinion);
+        byId.getExpert().setAverageScore(opinion.getScore());
+        expertService.updateExpert(byId.getExpert());
     }
 
-    @Transactional
+    /*@Transactional
     public void saveIdea(String emailAddress, String comment) {
         Expert expertByEmail = expertService.findExpertByEmail(emailAddress);
         opinion.setComment(comment);
         expertByEmail.getOpinionList().add(opinion);
         expertService.registerExpert(expertByEmail);
-    }*/
-
-
-    public Expert paidForExpert(Long idChoiceOffer, String emailCustomer, String emailAddress) {
-        Offer offerById = offerService.findById(idChoiceOffer);
-        Customer customerByEmail = findCustomerByEmail(emailCustomer);
-        Expert expertByEmail = expertService.findExpertByEmail(emailAddress);
-        if (offerById.getPriceOffer() > customerByEmail.getAmount())
-            throw new RuntimeException("price offer is more than stock!!");
-        customerByEmail.setAmount(customerByEmail.getAmount() - offerById.getPriceOffer());
-        expertByEmail.setAmount(expertByEmail.getAmount() + offerById.getPriceOffer());
-        offerById.getOrderCustomer().setCurrentSituation(CurrentSituation.PAID);
-        offerService.saveAllOffer(offerById);
-        registerCustomer(customerByEmail);
-        return expertService.updateExpert(expertByEmail);
     }
-
+*/
 
 }

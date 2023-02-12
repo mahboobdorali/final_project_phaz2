@@ -71,19 +71,24 @@ public class ExpertService {
     }
 
     @Transactional
-    public Offer OfferAnSubmit(Offer offer, Long idUnder, Long idOrder) {
+    public void checkConditionForOffer(Long idUnder, Offer offer) {
         UnderService underServiceById = underService.findUnderServiceById(idUnder);
         if (offer.getPriceOffer() < underServiceById.getBasePrice())
             throw new NoResultException("your price  is not available");
         if (DateUtil.isNotDateValid(offer.getTimeProposeToStartWork())) {
             throw new NoResultException("your date is not available");
         }
+
+    }
+
+    @Transactional
+    public void OfferAnSubmit(Offer offer, Long idUnder, Long idOrder) {
+        checkConditionForOffer(idUnder, offer);
         OrderCustomer orderById = orderService.findOrderById(idOrder);
         checkSituation(orderById.getCurrentSituation());
         orderById.setCurrentSituation(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION);
         offer.setOrderCustomer(orderById);
         offerService.saveAllOffer(offer);
-        return offer;
     }
 
 
@@ -95,40 +100,11 @@ public class ExpertService {
         if (currentSituationList.contains(currentSituation))
             throw new NoResultException("your state is not safe");
     }
-
     @Transactional
     public void setExpertToOffer(Long idOffer, Long idExpert) {
         Offer offer = offerService.findById(idOffer);
         Expert expertById = findExpertById(idExpert);
         offer.setExpert(expertById);
-    }
-
-    public Expert saveImage(String emailExpert) {
-        Expert expertByEmail = findExpertByEmail(emailExpert);
-        File file = new File("D:\\java\\final-project\\final_project_phaz2\\src\\main\\java\\com\\maktab\\final_project_phaz2\\date\\man22.jpg");
-        byte[] file1 = new byte[(int) file.length()];
-        try {
-            FileInputStream fileInputStream = new FileInputStream(file);
-            fileInputStream.read(file1);
-            fileInputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        expertByEmail.setImage(file1);
-        registerExpert(expertByEmail);
-        return expertByEmail;
-    }
-
-    public void getImage(String expertEmail) {
-        Expert expertByEmail = findExpertByEmail(expertEmail);
-        byte[] image = expertByEmail.getImage();
-        try {
-            FileOutputStream fileOutputStream = new FileOutputStream("D:\\java\\final-project\\final_project_phaz2\\src\\main\\java\\com\\maktab\\final_project_phaz2\\date\\image.jpg");
-            fileOutputStream.write(image);
-            fileOutputStream.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
 
