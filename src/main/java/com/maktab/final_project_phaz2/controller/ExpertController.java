@@ -1,24 +1,22 @@
 package com.maktab.final_project_phaz2.controller;
 
-import com.maktab.final_project_phaz2.date.dto.ExpertDto;
-import com.maktab.final_project_phaz2.date.dto.OfferDto;
-import com.maktab.final_project_phaz2.date.dto.OrderDto;
-import com.maktab.final_project_phaz2.date.dto.UserDto;
+import com.maktab.final_project_phaz2.date.dto.*;
 import com.maktab.final_project_phaz2.date.model.Expert;
 import com.maktab.final_project_phaz2.date.model.Offer;
 import com.maktab.final_project_phaz2.date.model.OrderCustomer;
 import com.maktab.final_project_phaz2.date.model.UnderService;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.exception.NoResultException;
-import com.maktab.final_project_phaz2.service.AdminService;
-import com.maktab.final_project_phaz2.service.ExpertService;
-import com.maktab.final_project_phaz2.service.OrderService;
+import com.maktab.final_project_phaz2.service.*;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,8 +28,9 @@ public class ExpertController {
     private final ModelMapper mapper;
     private final ExpertService expertService;
     private final AdminService adminService;
-
+    private final OpinionService opinionService;
     private final OrderService orderService;
+    private final ImageService imageService;
 
     @PostMapping("/add_expert")
     public ResponseEntity<String> addExpert(@RequestBody ExpertDto expertDto) {
@@ -98,7 +97,7 @@ public class ExpertController {
     }
 
     @PostMapping("/setExpertId")
-    public ResponseEntity<String> serExpert(@RequestParam Long idOffer, @RequestParam Long idExpert) {
+    public ResponseEntity<String> setExpert(@RequestParam Long idOffer, @RequestParam Long idExpert) {
         expertService.setExpertToOffer(idOffer, idExpert);
         return ResponseEntity.ok().body("this expert offer an submit");
     }
@@ -123,10 +122,27 @@ public class ExpertController {
 
     @GetMapping("/underByStatus")
     public ResponseEntity<List<OrderDto>> ListUnderRelatedExpertInStatus(
-            @RequestParam("name")String name, @RequestParam("status") CurrentSituation status,
+            @RequestParam("name") String name, @RequestParam("status") CurrentSituation status,
             @RequestParam("status1") CurrentSituation status1) {
         return ResponseEntity.ok().body(orderService.findOrderByUnderServiceAndStatus(name, status, status1).stream()
                 .map(orderCustomer -> mapper.map(orderCustomer, OrderDto.class)).collect(Collectors.toList()));
     }
 
+    @GetMapping("/show-orders")
+    public ResponseEntity<List<OpinionShowScoreDto>> ListOrder(@RequestParam("emailAddress") String emailAddress) {
+        return ResponseEntity.ok().body(opinionService.showOrdersToExpert(emailAddress).stream()
+                .map(opinion -> mapper.map(opinion, OpinionShowScoreDto.class)).collect(Collectors.toList()));
+    }
+
+    @PostMapping("/upload-image")
+    public ResponseEntity<String> uploadImage(@RequestParam("idExpert") Long idExpert, @RequestParam("image") MultipartFile file) throws IOException {
+        imageService.uploadImage(file, idExpert);
+        return ResponseEntity.ok().body("your image saved :)");
+    }
+
+    @GetMapping("/get-image")
+    public ResponseEntity<byte[]> getImageFromDatabase(@RequestParam("emailAddress") String emailAddress) {
+        byte[] image = imageService.getImage(emailAddress);
+   return ResponseEntity.ok().contentType(MediaType.valueOf("image/jpeg")).body(image);
+    }
 }

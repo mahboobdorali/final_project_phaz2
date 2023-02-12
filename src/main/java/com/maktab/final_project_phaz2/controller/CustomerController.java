@@ -113,22 +113,32 @@ public class CustomerController {
         return ResponseEntity.ok().body("*this offer selected by you");
     }
 
-    /* @PostMapping("/saveScore")
-    public ResponseEntity<String> saveScoreForExpert(@RequestParam("idExpert") Long idExpert, @RequestParam("score") Integer score) {
-        customerService.saveComments(idExpert, score);
-        return ResponseEntity.ok().body("*your score is save");
-
-    }*/
-
     @PutMapping("/changeStatus")
     public ResponseEntity<String> changeStatusToStart(@RequestParam("idOffer") Long idOffer,
                                                       @RequestParam("idOrder") Long idOrder) {
         customerService.changeSituationByCustomer(idOffer, idOrder);
-        return ResponseEntity.ok().body("*situation of your order changed(:");
+        return ResponseEntity.ok().body("*situation of your order changed to started(:");
     }
-   /* @PutMapping("/switchingStatus")
-    public ResponseEntity<String>changeStatusToFinish(@RequestParam("id")Long id){
-        customerService.(id);
+
+    @PutMapping("/switchingStatus")
+    public ResponseEntity<String> changeStatusToFinish(@RequestParam("id") Long id) {
+        customerService.changeSituationForFinish(id);
         return ResponseEntity.ok().body("*situation of your order changed to done");
-    }*/
+    }
+
+    @PutMapping("payment-from-credit")
+    public ResponseEntity<String> paidFromCustomerCredit(@RequestParam("idChoiceOffer") Long idChoiceOffer,
+                                                         @RequestParam("emailCustomer") String emailCustomer) {
+        customerService.paymentFromCredit(idChoiceOffer, emailCustomer);
+        return ResponseEntity.ok().body("your payment has been successfully completed!!");
+    }
+
+    @PostMapping("/saveScore")
+    public ResponseEntity<String> saveScoreForExpert(@RequestParam("idOffer") Long idOffer, @RequestBody OpinionDto opinionDto) {
+        Opinion opinion = mapper.map(opinionDto, Opinion.class);
+        customerService.saveComments(idOffer,opinion);
+        return ResponseEntity.ok().body("*your score is save");
+    }
+
+
 }

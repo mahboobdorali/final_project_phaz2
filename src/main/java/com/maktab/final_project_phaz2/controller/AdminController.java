@@ -1,9 +1,13 @@
 package com.maktab.final_project_phaz2.controller;
 
+import com.maktab.final_project_phaz2.date.dto.ExpertDto;
+import com.maktab.final_project_phaz2.date.dto.SearchExpertDto;
 import com.maktab.final_project_phaz2.date.dto.ServiceDto;
 import com.maktab.final_project_phaz2.date.dto.UnderServiceDto;
+import com.maktab.final_project_phaz2.date.model.Expert;
 import com.maktab.final_project_phaz2.date.model.MainTask;
 import com.maktab.final_project_phaz2.date.model.UnderService;
+import com.maktab.final_project_phaz2.date.repository.ExpertRepository;
 import com.maktab.final_project_phaz2.service.AdminService;
 import com.maktab.final_project_phaz2.service.MainTaskService;
 import com.maktab.final_project_phaz2.service.ServiceUnderService;
@@ -24,6 +28,7 @@ public class AdminController {
     private final ServiceUnderService serviceUnderService;
     private final MainTaskService mainTaskService;
     private final AdminService adminService;
+    private final ExpertRepository expertRepository;
 
 
     @PostMapping("/add_underService")
@@ -96,4 +101,9 @@ public class AdminController {
         return ResponseEntity.ok().body(serviceDto);
     }
 
+    @GetMapping("/search-by-admin")
+    public ResponseEntity<List<SearchExpertDto>> filterAdmin(@RequestBody SearchExpertDto expert) {
+        return ResponseEntity.ok().body(adminService.filterExpertByCondition(expert).stream().
+                map(expert1-> mapper.map(expert1,SearchExpertDto.class)).collect(Collectors.toList()));
+    }
 }
