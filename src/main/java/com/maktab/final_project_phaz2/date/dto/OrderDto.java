@@ -13,14 +13,23 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderDto {
+
     private double proposedPrice;
+
     private String jobDescription;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private String dateAndTimeOfWork;
+    private Date dateAndTimeOfWork;
+
     private String street;
 
     private String city;
 
     private String plaque;
+
     private CurrentSituation currentSituation;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date whenWorkDone;
+
 }

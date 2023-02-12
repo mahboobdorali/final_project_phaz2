@@ -5,7 +5,6 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.Duration;
 import java.util.Date;
 
 @Getter
@@ -28,12 +27,12 @@ public class Offer extends BaseEntity {
 
     private double priceOffer;
 
-    private Duration durationOfWork;
+    private Long durationOfWork;
 
     @Temporal(value = TemporalType.TIMESTAMP)
     private Date TimeProposeToStartWork;
 
-    public Offer(Long id, Date dateAndTimeRegistrationOfOffer, Expert expert, OrderCustomer orderCustomer, double priceOffer, Duration durationOfWork, Date timeProposeToStartWork) {
+    public Offer(Long id, Date dateAndTimeRegistrationOfOffer, Expert expert, OrderCustomer orderCustomer, double priceOffer, Long durationOfWork, Date timeProposeToStartWork) {
         super(id);
         this.dateAndTimeRegistrationOfOffer = dateAndTimeRegistrationOfOffer;
         this.expert = expert;

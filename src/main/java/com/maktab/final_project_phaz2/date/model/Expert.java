@@ -18,20 +18,20 @@ import java.util.List;
 @SuperBuilder
 public class Expert extends Person implements Serializable {
 
-    private double averageScore;
+    private long averageScore;
 
-    @Lob
-    private byte[] image;
+    @OneToOne(fetch = FetchType.LAZY,cascade = CascadeType.PERSIST)
+    private Image image;
 
     @Enumerated(EnumType.STRING)
     private ApprovalStatus approvalStatus;
 
-    @ManyToMany(fetch = FetchType.LAZY,cascade=CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private List<UnderService> underServiceList = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "expert",cascade = CascadeType.PERSIST)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "expert", cascade = CascadeType.PERSIST)
     private List<Opinion> opinionList = new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "expert",cascade = CascadeType.PERSIST)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "expert", cascade = CascadeType.PERSIST)
     private List<OrderCustomer> ordersCustomer = new ArrayList<>();
 }

@@ -34,6 +34,9 @@ public class OrderCustomer extends BaseEntity {
     @Temporal(value = TemporalType.TIMESTAMP)
     private Date dateAndTimeOfWork;
 
+    @Temporal(value = TemporalType.TIMESTAMP)
+    private Date workDone;
+
     private String street;
 
     private String city;
