@@ -29,7 +29,4 @@ public class OrderDto {
 
     private CurrentSituation currentSituation;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date whenWorkDone;
-
 }
