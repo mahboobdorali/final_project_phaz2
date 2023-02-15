@@ -31,7 +31,7 @@ public class AdminController {
     private final ExpertRepository expertRepository;
 
 
-    @PostMapping("/add_underService")
+    @PostMapping("/add-under-service")
     public ResponseEntity<String> addUnderService(@RequestBody UnderServiceDto underServiceDto, @RequestParam Long idService) {
         UnderService underService = mapper.map(underServiceDto, UnderService.class);
         serviceUnderService.addUnderServiceByAdmin(underService, idService);
@@ -39,7 +39,7 @@ public class AdminController {
     }
 
 
-    @PostMapping("/add_Service")
+    @PostMapping("/add-Service")
     public ResponseEntity<String> addService(@RequestBody ServiceDto ServiceDto) {
         MainTask mainTask = mapper.map(ServiceDto, MainTask.class);
         mainTaskService.addServiceByAdmin(mainTask);
@@ -58,20 +58,20 @@ public class AdminController {
         return ResponseEntity.ok().body("***subService price corrected***");
     }
 
-    @GetMapping("/getAll_underService")
+    @GetMapping("/getAll_under-service")
     public ResponseEntity<List<UnderServiceDto>> getAllUnderService() {
         return ResponseEntity.ok().body(serviceUnderService.getAllUnderService().stream().
                 map(underService -> mapper.map(underService, UnderServiceDto.class)).collect(Collectors.toList()));
     }
 
 
-    @GetMapping("/getAll_mainService")
+    @GetMapping("/getAll_main-service")
     public ResponseEntity<List<ServiceDto>> getAllService() {
         return ResponseEntity.ok().body(mainTaskService.getAllService().stream().
                 map(mainTask -> mapper.map(mainTask, ServiceDto.class)).collect(Collectors.toList()));
     }
 
-    @GetMapping("/findSubServiceByName")
+    @GetMapping("/find-sub-service-by-name")
     public ResponseEntity<UnderServiceDto> getUnderServiceByName(@RequestParam("underServiceName") String underServiceName) {
         UnderService underServiceByName = serviceUnderService.findUnderServiceByName(underServiceName);
         UnderServiceDto underServiceDto = mapper.map(underServiceByName, UnderServiceDto.class);
@@ -79,7 +79,7 @@ public class AdminController {
     }
 
 
-    @GetMapping("/findSubServiceById")
+    @GetMapping("/find-sub-service-by-id")
     public ResponseEntity<UnderServiceDto> getUnderServiceById(@RequestParam("id") @Min(1) Long id) {
         UnderService underServiceById = serviceUnderService.findUnderServiceById(id);
         UnderServiceDto underServiceDto = mapper.map(underServiceById, UnderServiceDto.class);
@@ -87,14 +87,14 @@ public class AdminController {
     }
 
 
-    @GetMapping("/findServiceByName")
+    @GetMapping("/find-service-by-name")
     public ResponseEntity<ServiceDto> getServiceByName(@RequestParam("serviceName") String serviceName) {
         MainTask serviceByName = mainTaskService.findServiceByName(serviceName);
         ServiceDto serviceDto = mapper.map(serviceByName, ServiceDto.class);
         return ResponseEntity.ok().body(serviceDto);
     }
 
-    @GetMapping("/findServiceById")
+    @GetMapping("/find-service-by-id")
     public ResponseEntity<ServiceDto> getServiceById(@RequestParam("id") @Min(1) Long id) {
         MainTask serviceById = mainTaskService.findServiceById(id);
         ServiceDto serviceDto = mapper.map(serviceById, ServiceDto.class);

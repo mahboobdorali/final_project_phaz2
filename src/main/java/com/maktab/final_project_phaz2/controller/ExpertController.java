@@ -61,34 +61,34 @@ public class ExpertController {
         return ResponseEntity.ok().body("expert delete :)");
     }
 
-    @GetMapping("/getAll_expert")
+    @GetMapping("/get-all_expert")
     public ResponseEntity<List<UserDto>> getAllExpert() {
         return ResponseEntity.ok().body(expertService.getAllExpert().stream().
                 map(expert -> mapper.map(expert, UserDto.class)).collect(Collectors.toList()));
     }
 
-    @GetMapping("/findExpertById")
+    @GetMapping("/find-expert-by-id")
     public ResponseEntity<UserDto> getById(@RequestParam("id") @Min(1) Long id) {
         Expert expertById = expertService.findExpertById(id);
         UserDto userDto = mapper.map(expertById, UserDto.class);
         return ResponseEntity.ok().body(userDto);
     }
 
-    @GetMapping("/findExpertByEmail")
+    @GetMapping("/find-expert-by-email")
     public ResponseEntity<UserDto> getByEmail(@RequestParam("emailAddress") String emailAddress) {
         Expert expertByEmail = expertService.findExpertByEmail(emailAddress);
         UserDto userDto = mapper.map(expertByEmail, UserDto.class);
         return ResponseEntity.ok().body(userDto);
     }
 
-    @PutMapping("/change_Password")
+    @PutMapping("/change_password")
     public ResponseEntity<String> changePassword(@RequestParam("emailAddress") String emailAddress,
                                                  @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword) {
         expertService.changePassword(emailAddress, oldPassword, newPassword);
         return ResponseEntity.ok().body("password changed :)");
     }
 
-    @PostMapping("/saveOffer")
+    @PostMapping("/save-offer")
     public ResponseEntity<String> offerAnSubmitByExpert(@RequestBody OfferDto offerDto, @RequestParam("idUnderService") Long idUnderService,
                                                         @RequestParam("idOrder") Long idOrder) {
         Offer offer = mapper.map(offerDto, Offer.class);
@@ -96,31 +96,31 @@ public class ExpertController {
         return ResponseEntity.ok().body("this offer saved :)");
     }
 
-    @PostMapping("/setExpertId")
+    @PostMapping("/set-expert-id")
     public ResponseEntity<String> setExpert(@RequestParam Long idOffer, @RequestParam Long idExpert) {
         expertService.setExpertToOffer(idOffer, idExpert);
         return ResponseEntity.ok().body("this expert offer an submit");
     }
 
-    @PutMapping("/changeStatus")
+    @PutMapping("/change-status")
     public ResponseEntity<String> convertExpertStatus(@RequestParam("emailAddress") String emailAddress) {
         adminService.convertStatus(emailAddress);
         return ResponseEntity.ok().body("expert status changed to approved:)");
     }
 
-    @PostMapping("/addExpertToUnderService")
+    @PostMapping("/add-expert-to-under-service")
     public ResponseEntity<String> addExpertToUnderServiceByAdmin(@RequestParam("idUnderService") Long idUnderService, @RequestParam("idExpert") Long idExpert) {
         adminService.addExpertToUnderService(idUnderService, idExpert);
         return ResponseEntity.ok().body("this expert add to underService");
     }
 
-    @DeleteMapping("/deleteExpertFromUnderService")
+    @DeleteMapping("/delete-expert-from-under-service")
     public ResponseEntity<String> deleteExpertFromUnderServiceByAdmin(@RequestParam("idUnderService") Long idUnderService, @RequestParam("idExpert") Long idExpert) {
         adminService.deleteExpertFromUnderService(idUnderService, idExpert);
         return ResponseEntity.ok().body("this expert deleted from underService");
     }
 
-    @GetMapping("/underByStatus")
+    @GetMapping("/under-service-by-status")
     public ResponseEntity<List<OrderDto>> ListUnderRelatedExpertInStatus(
             @RequestParam("name") String name, @RequestParam("status") CurrentSituation status,
             @RequestParam("status1") CurrentSituation status1) {

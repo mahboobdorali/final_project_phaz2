@@ -5,11 +5,14 @@ import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import com.maktab.final_project_phaz2.service.CustomerService;
 import com.maktab.final_project_phaz2.service.ServiceUnderService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,6 +24,7 @@ public class CustomerController {
     private final ModelMapper mapper;
     private final CustomerService customerService;
     private final ServiceUnderService underService;
+    private String message;
 
     @PostMapping("/add_customer")
     public ResponseEntity<String> addCustomer(@RequestBody CustomerDto customerDto) {
@@ -51,13 +55,13 @@ public class CustomerController {
         return ResponseEntity.ok().body("customer deleted");
     }
 
-    @GetMapping("/getAll_customer")
+    @GetMapping("/get-all_customer")
     public ResponseEntity<List<UserDto>> getAllCustomer() {
         return ResponseEntity.ok().body(customerService.getAllCustomer().stream().
                 map(customer -> mapper.map(customer, UserDto.class)).collect(Collectors.toList()));
     }
 
-    @GetMapping("/findCustomerById")
+    @GetMapping("/find-customer-by-id")
     public ResponseEntity<UserDto> getById(@RequestParam("id") @Min(1) Long id) {
         Customer customerById = customerService.findCustomerById(id);
         UserDto userDto = mapper.map(customerById, UserDto.class);
@@ -65,14 +69,14 @@ public class CustomerController {
 
     }
 
-    @GetMapping("/findCustomerByEmail")
+    @GetMapping("/find-customer-by-email")
     public ResponseEntity<UserDto> getByEmail(@RequestParam("emailAddress") String emailAddress) {
         Customer customerByEmail = customerService.findCustomerByEmail(emailAddress);
         UserDto userDto = mapper.map(customerByEmail, UserDto.class);
         return ResponseEntity.ok().body(userDto);
     }
 
-    @PutMapping("/change_Password")
+    @PutMapping("/change_password")
     public ResponseEntity<String> changePassword(@RequestParam("emailAddress") String emailAddress,
                                                  @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword) {
         customerService.changePassword(emailAddress, oldPassword, newPassword);
@@ -87,40 +91,40 @@ public class CustomerController {
         return ResponseEntity.ok().body("this order saved :)");
     }
 
-    @GetMapping("/show_mainTask")
+    @GetMapping("/show_main-task")
     public ResponseEntity<List<UnderServiceDto>> showMainTaskByUnderService(@RequestParam("name") String name) {
         return ResponseEntity.ok().body(underService.showAllUnderServiceByServiceByCustomer(name).stream().
                 map(underService -> mapper.
                         map(underService, UnderServiceDto.class)).collect(Collectors.toList()));
     }
 
-    @GetMapping("/sortByPrice")
+    @GetMapping("/sort-by-price")
     public ResponseEntity<List<OfferDto>> sortOfferByPrice(@RequestParam("idOrderCustomer") Long idOrderCustomer) {
         return ResponseEntity.ok().body(customerService.sortByPrice(idOrderCustomer).stream().map(offer1 -> mapper.
                 map(offer1, OfferDto.class)).collect(Collectors.toList()));
     }
 
-    @GetMapping("/sortByScore")
+    @GetMapping("/sort-by-score")
     public ResponseEntity<List<OfferDto>> sortOffer(@RequestParam("idOrderCustomer") Long idOrderCustomer) {
         return ResponseEntity.ok().body(customerService.sortByScore(idOrderCustomer).stream().map(offer2 -> mapper.
                 map(offer2, OfferDto.class)).collect(Collectors.toList()));
     }
 
-    @PutMapping("/selectOffer")
+    @PutMapping("/select-offer")
     public ResponseEntity<String> choiceOfferByCustomer(@RequestParam("idSelectOffer") Long idSelectOffer
             , @RequestParam("idOrder") Long idOrder) {
         customerService.selectOfferByCustomer(idSelectOffer, idOrder);
         return ResponseEntity.ok().body("*this offer selected by you");
     }
 
-    @PutMapping("/changeStatus")
+    @PutMapping("/change-status")
     public ResponseEntity<String> changeStatusToStart(@RequestParam("idOffer") Long idOffer,
                                                       @RequestParam("idOrder") Long idOrder) {
         customerService.changeSituationByCustomer(idOffer, idOrder);
         return ResponseEntity.ok().body("*situation of your order changed to started(:");
     }
 
-    @PutMapping("/switchingStatus")
+    @PutMapping("/switching-status")
     public ResponseEntity<String> changeStatusToFinish(@RequestParam("id") Long id) {
         customerService.changeSituationForFinish(id);
         return ResponseEntity.ok().body("*situation of your order changed to done");
@@ -133,12 +137,28 @@ public class CustomerController {
         return ResponseEntity.ok().body("your payment has been successfully completed!!");
     }
 
-    @PostMapping("/saveScore")
+
+    @PostMapping("/save")
+    public String save(@ModelAttribute("creditCardDto") CreditCardDto creditCardDto, HttpServletRequest request) {
+        System.out.println("in save method");
+        if (creditCardDto.getCaptcha().equals(request.getSession().getAttribute("captcha"))) {
+            System.out.println("captcha is correct");
+        }
+        return "nothing";
+    }
+
+    @PostMapping("/save-score")
     public ResponseEntity<String> saveScoreForExpert(@RequestParam("idOffer") Long idOffer, @RequestBody OpinionDto opinionDto) {
         Opinion opinion = mapper.map(opinionDto, Opinion.class);
-        customerService.saveComments(idOffer,opinion);
+        customerService.saveComments(idOffer, opinion);
         return ResponseEntity.ok().body("*your score is save");
     }
 
-
+    @PostMapping("/save-done-sate")
+    public ResponseEntity<String> saveDoneDateByCustomer(@RequestBody DateOrderCustomerDto dateOrderCustomerDto,
+                                                         @RequestParam("idOffer") Long idOffer) {
+        OrderCustomer orderCustomer = mapper.map(dateOrderCustomerDto, OrderCustomer.class);
+        customerService.setDoneDate(orderCustomer.getWorkDone(), idOffer);
+        return ResponseEntity.ok().body("*the completion time of the work was recorded by you");
+    }
 }
