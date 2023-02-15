@@ -6,7 +6,9 @@ import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.date.model.enumuration.Role;
 import com.maktab.final_project_phaz2.date.repository.ExpertRepository;
+import com.maktab.final_project_phaz2.exception.InputInvalidException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
+import com.maktab.final_project_phaz2.exception.RequestIsNotValidException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +49,7 @@ public class ExpertService {
         Expert expert = expertRepository.findByEmailAddress(emailAddress).
                 orElseThrow(() -> new NoResultException(" this customer dose not exist"));
         if (!(expert.getPassword().equals(password)))
-            throw new NoResultException("is not exist password");
+            throw new InputInvalidException("is not exist password");
         return expert;
     }
 
@@ -55,7 +57,7 @@ public class ExpertService {
         Expert expert = expertRepository.findByEmailAddress(emailAddress).
                 orElseThrow(() -> new NoResultException(" this customer dose not exist"));
         if (!(expert.getPassword().equals(oldPassword)))
-            throw new NoResultException("is not exist password");
+            throw new RequestIsNotValidException("is not exist password");
         expert.setPassword(newPassword);
         expertRepository.save(expert);
     }
@@ -74,9 +76,9 @@ public class ExpertService {
     public void checkConditionForOffer(Long idUnder, Offer offer) {
         UnderService underServiceById = underService.findUnderServiceById(idUnder);
         if (offer.getPriceOffer() < underServiceById.getBasePrice())
-            throw new NoResultException("your price  is not available");
+            throw new RequestIsNotValidException("your price  is not available");
         if (DateUtil.isNotDateValid(offer.getTimeProposeToStartWork())) {
-            throw new NoResultException("your date is not available");
+            throw new RequestIsNotValidException("your date is not available");
         }
 
     }
@@ -98,8 +100,9 @@ public class ExpertService {
                 CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION_TO_COME,
                 CurrentSituation.STARTED);
         if (currentSituationList.contains(currentSituation))
-            throw new NoResultException("your state is not safe");
+            throw new RequestIsNotValidException("your state is not safe");
     }
+
     @Transactional
     public void setExpertToOffer(Long idOffer, Long idExpert) {
         Offer offer = offerService.findById(idOffer);

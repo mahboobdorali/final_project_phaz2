@@ -1,18 +1,24 @@
 package com.maktab.final_project_phaz2.service;
 
 import com.maktab.final_project_phaz2.Util.DateUtil;
+import com.maktab.final_project_phaz2.date.dto.CreditCardDto;
 import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.date.model.enumuration.Role;
 import com.maktab.final_project_phaz2.date.repository.CustomerRepository;
 import com.maktab.final_project_phaz2.date.repository.OfferRepository;
+import com.maktab.final_project_phaz2.exception.InputInvalidException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
+import com.maktab.final_project_phaz2.exception.RequestIsNotValidException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 @Service
@@ -26,6 +32,7 @@ public class CustomerService {
     private final MainTaskService mainTaskService;
     private final OpinionService opinionService;
     private final ExpertService expertService;
+    private Set<CreditCardDto> creditCardDtos = new HashSet<CreditCardDto>();
 
     public void registerCustomer(Customer customer) {
         customer.setRole(Role.CUSTOMER);
@@ -49,7 +56,7 @@ public class CustomerService {
         Customer customer = customerRepository.findByEmailAddress(emailAddress).
                 orElseThrow(() -> new NoResultException(" this customer dose not exist"));
         if (!(customer.getPassword().equals(password)))
-            throw new NoResultException("is not exist password");
+            throw new InputInvalidException("is not exist password");
         return customer;
     }
 
@@ -67,7 +74,7 @@ public class CustomerService {
         Customer customer = customerRepository.findByEmailAddress(emailAddress).
                 orElseThrow(() -> new NoResultException(" this customer dose not exist"));
         if (!(customer.getPassword().equals(oldPassword)))
-            throw new NoResultException("is not exist password");
+            throw new RequestIsNotValidException("is not exist password");
         customer.setPassword(newPassword);
         customerRepository.save(customer);
     }
@@ -85,9 +92,9 @@ public class CustomerService {
         UnderService serviceById = underService.findUnderServiceById(idOfChoiceUnderService);
         Customer customerById = findCustomerById(idCustomer);
         if (ordersCustomer.getProposedPrice() < serviceById.getBasePrice())
-            throw new NoResultException("the entered price is lower than the allowed limit!!");
+            throw new RequestIsNotValidException("the entered price is lower than the allowed limit!!");
         if (DateUtil.isNotDateValid(ordersCustomer.getDateAndTimeOfWork()))
-            throw new NoResultException("the entered date is lower than the allowed limit!!");
+            throw new RequestIsNotValidException("the entered date is lower than the allowed limit!!");
         ordersCustomer.setCurrentSituation(CurrentSituation.WAITING_FOR_EXPERT_OFFER);
         ordersCustomer.setCustomer(customerById);
         ordersCustomer.setUnderService(serviceById);
@@ -117,9 +124,17 @@ public class CustomerService {
         Offer offerId = offerService.findById(idForChoiceOffer);
         OrderCustomer orderById = orderService.findOrderById(idOrder);
         if (offerId.getTimeProposeToStartWork().before(orderById.getDateAndTimeOfWork()))
-            throw new NoResultException("time has not come to do the work!!");
+            throw new RequestIsNotValidException("time has not come to do the work!!");
         orderById.setCurrentSituation(CurrentSituation.STARTED);
         offerService.updateOffer(offerId);
+    }
+
+    public void setDoneDate(Date doneDate, Long idOffer) {
+        Offer offer = offerService.findById(idOffer);
+        if (doneDate.before(offer.getTimeProposeToStartWork()))
+            throw new NoResultException("the entered time is before the time suggested by the expert");
+        offer.getOrderCustomer().setWorkDone(doneDate);
+        offerService.saveAllOffer(offer);
     }
 
     public void changeSituationForFinish(Long id) {
@@ -141,7 +156,7 @@ public class CustomerService {
         Offer offerById = offerService.findById(idChoiceOffer);
         Customer customerByEmail = findCustomerByEmail(emailCustomer);
         if (offerById.getPriceOffer() > customerByEmail.getAmount())
-            throw new RuntimeException("price offer is more than stock!!");
+            throw new RequestIsNotValidException("price offer is more than stock!!");
         customerByEmail.setAmount(customerByEmail.getAmount() - offerById.getPriceOffer());
         double percent = (offerById.getPriceOffer() / 100) * 70;
         offerById.getExpert().setAmount(percent);
@@ -150,24 +165,18 @@ public class CustomerService {
         registerCustomer(customerByEmail);
     }
 
+    public void OnlinePaymentByCustomer(CreditCardDto creditCardDto) {
+        creditCardDtos.add(creditCardDto);
+
+    }
 
     public void saveComments(Long idOffer, Opinion opinion) {
         Offer byId = offerService.findById(idOffer);
         if (opinion.getScore() < 1 || opinion.getScore() > 6)
-            throw new NoResultException("the score entered must be a number between one and five(1-5");
+            throw new RequestIsNotValidException("the score entered must be a number between one and five(1-5");
         opinion.setExpert(byId.getExpert());
         opinionService.registerOpinion(opinion);
         byId.getExpert().setAverageScore(opinion.getScore());
         expertService.updateExpert(byId.getExpert());
     }
-
-    /*@Transactional
-    public void saveIdea(String emailAddress, String comment) {
-        Expert expertByEmail = expertService.findExpertByEmail(emailAddress);
-        opinion.setComment(comment);
-        expertByEmail.getOpinionList().add(opinion);
-        expertService.registerExpert(expertByEmail);
-    }
-*/
-
 }

@@ -7,7 +7,10 @@ import com.maktab.final_project_phaz2.date.model.MainTask;
 import com.maktab.final_project_phaz2.date.model.UnderService;
 import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
 import com.maktab.final_project_phaz2.date.repository.ExpertRepository;
+import com.maktab.final_project_phaz2.exception.InputInvalidException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
+import com.maktab.final_project_phaz2.exception.RequestIsNotValidException;
+import com.maktab.final_project_phaz2.exception.SourceUsageRestrictionsException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +43,7 @@ public class AdminService {
     public void convertStatus(String emailAddress) {
         Expert expert1 = expertService.findExpertByEmail(emailAddress);
         if (expert1.getApprovalStatus().equals(ApprovalStatus.ACCEPTED)) {
-            throw new NoResultException("you have already been approved by the administrator");
+            throw new RequestIsNotValidException("you have already been approved by the administrator");
         } else
             expert1.setApprovalStatus(ApprovalStatus.ACCEPTED);
         expertService.updateExpert(expert1);
@@ -51,7 +54,7 @@ public class AdminService {
         UnderService underService = serviceUnderService.findUnderServiceById(idUnderService);
         Expert expertById = expertService.findExpertById(idExpert);
         if (expertById.getApprovalStatus().equals(ApprovalStatus.NEW))
-            throw new NoResultException("first admin should confirmed you!!");
+            throw new SourceUsageRestrictionsException("first admin should confirmed you!!");
         expertById.getUnderServiceList().add(underService);
         return expertService.updateExpert(expertById);
     }
