@@ -2,7 +2,6 @@ package com.maktab.final_project_phaz2.date.repository;
 
 import com.maktab.final_project_phaz2.date.model.Offer;
 import com.maktab.final_project_phaz2.date.model.OrderCustomer;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,6 +17,9 @@ public interface OfferRepository extends JpaRepository<Offer, Long> {
 
     @Query("select o from Offer o where o.orderCustomer=:orderCustomer order by o.expert.averageScore desc")
     List<Offer> sortOfferByScore(OrderCustomer orderCustomer);
+
+    @Query("select e from Offer e where e.expert.emailAddress=:emailAddress")
+    List<Offer> listOfferByExpert(String emailAddress);
 
     Optional<Offer> findById(Long id);
 

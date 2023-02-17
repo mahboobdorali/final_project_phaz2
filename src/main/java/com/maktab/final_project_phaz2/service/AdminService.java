@@ -1,14 +1,11 @@
 package com.maktab.final_project_phaz2.service;
 
 import com.maktab.final_project_phaz2.date.dto.SearchExpertDto;
-import com.maktab.final_project_phaz2.date.dto.UnderServiceDto;
 import com.maktab.final_project_phaz2.date.model.Expert;
 import com.maktab.final_project_phaz2.date.model.MainTask;
 import com.maktab.final_project_phaz2.date.model.UnderService;
 import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
 import com.maktab.final_project_phaz2.date.repository.ExpertRepository;
-import com.maktab.final_project_phaz2.exception.InputInvalidException;
-import com.maktab.final_project_phaz2.exception.NoResultException;
 import com.maktab.final_project_phaz2.exception.RequestIsNotValidException;
 import com.maktab.final_project_phaz2.exception.SourceUsageRestrictionsException;
 import jakarta.persistence.criteria.Join;
@@ -81,7 +78,7 @@ public class AdminService {
 
     public List<Expert> filterExpertByCondition(SearchExpertDto expert) {
         return expertRepository.findAll((Specification<Expert>) (root, query, criteriaBuilder) -> {
-            Join<Expert,UnderService>expertUnderServiceJoin=root.join("underServiceList");
+            Join<Expert, UnderService> expertUnderServiceJoin = root.join("underServiceList");
             List<Predicate> predicateList = new ArrayList<>();
             if (expert.getName() != null && expert.getName().length() != 0)
                 predicateList.add(criteriaBuilder.equal(root.get("name"), expert.getName()));
@@ -97,7 +94,7 @@ public class AdminService {
             if (expert.getAverageScore() < 6)
                 query.orderBy(criteriaBuilder.desc(root.get("averageScore")));
             return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
-       });
+        });
     }
 }
 

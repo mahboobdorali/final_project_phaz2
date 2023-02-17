@@ -1,18 +1,20 @@
 package com.maktab.final_project_phaz2.controller;
 
+import com.maktab.final_project_phaz2.Util.Validation;
 import com.maktab.final_project_phaz2.date.dto.*;
 import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import com.maktab.final_project_phaz2.service.CustomerService;
 import com.maktab.final_project_phaz2.service.ServiceUnderService;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,10 +26,10 @@ public class CustomerController {
     private final ModelMapper mapper;
     private final CustomerService customerService;
     private final ServiceUnderService underService;
-    private String message;
+    private final RestTemplate restTemplate;
 
     @PostMapping("/add_customer")
-    public ResponseEntity<String> addCustomer(@RequestBody CustomerDto customerDto) {
+    public ResponseEntity<String> addCustomer(@Valid @RequestBody CustomerDto customerDto) {
         Customer customer = mapper.map(customerDto, Customer.class);
         customerService.registerCustomer(customer);
         return ResponseEntity.ok().body("**you are registered as an customer**");
@@ -41,7 +43,7 @@ public class CustomerController {
     }
 
     @PutMapping("/update_customer")
-    public ResponseEntity<CustomerDto> update(@RequestBody CustomerDto customerDto) {
+    public ResponseEntity<CustomerDto> update(@Valid @RequestBody CustomerDto customerDto) {
         Customer customer = mapper.map(customerDto, Customer.class);
         Customer customer1 = customerService.updateCustomer(customer);
         CustomerDto customerDto1 = mapper.map(customer1, CustomerDto.class);
@@ -49,7 +51,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/delete_customer")
-    public ResponseEntity<String> delete(@RequestBody CustomerDto customerDto) {
+    public ResponseEntity<String> delete( @Valid @RequestBody CustomerDto customerDto) {
         Customer customer = mapper.map(customerDto, Customer.class);
         customerService.deleteCustomer(customer);
         return ResponseEntity.ok().body("customer deleted");
@@ -137,28 +139,37 @@ public class CustomerController {
         return ResponseEntity.ok().body("your payment has been successfully completed!!");
     }
 
-
-    @PostMapping("/save")
-    public String save(@ModelAttribute("creditCardDto") CreditCardDto creditCardDto, HttpServletRequest request) {
-        System.out.println("in save method");
-        if (creditCardDto.getCaptcha().equals(request.getSession().getAttribute("captcha"))) {
-            System.out.println("captcha is correct");
-        }
-        return "nothing";
-    }
-
     @PostMapping("/save-score")
-    public ResponseEntity<String> saveScoreForExpert(@RequestParam("idOffer") Long idOffer, @RequestBody OpinionDto opinionDto) {
+    public ResponseEntity<String> saveScoreForExpert(@RequestParam("idExpert") Long idExpert, @RequestBody OpinionDto opinionDto) {
         Opinion opinion = mapper.map(opinionDto, Opinion.class);
-        customerService.saveComments(idOffer, opinion);
+        customerService.saveComments(idExpert, opinion);
         return ResponseEntity.ok().body("*your score is save");
     }
 
-    @PostMapping("/save-done-sate")
-    public ResponseEntity<String> saveDoneDateByCustomer(@RequestBody DateOrderCustomerDto dateOrderCustomerDto,
-                                                         @RequestParam("idOffer") Long idOffer) {
+    @PostMapping("/save-done-date")
+    public ResponseEntity<String> saveDoneDateByCustomer(@Valid @RequestBody DateOrderCustomerDto dateOrderCustomerDto,
+                                                         @RequestParam("idOffer") Long idOffer,
+                                                         @RequestParam("idOrder")Long idOrder) {
         OrderCustomer orderCustomer = mapper.map(dateOrderCustomerDto, OrderCustomer.class);
-        customerService.setDoneDate(orderCustomer.getWorkDone(), idOffer);
+        customerService.setDoneDate(orderCustomer.getWorkDone(), idOffer,idOrder);
         return ResponseEntity.ok().body("*the completion time of the work was recorded by you");
     }
+    @GetMapping("/pay/online")
+    public String pay() {
+        return "payment";
+    }
+
+    @PostMapping(path = "/pay/online", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public @ResponseBody String payOnline(PaymentDto paymentDTO, @RequestParam("g-recaptcha-response") String captcha) {
+        String url = "https://www.google.com/recaptcha/api/siteverify";
+        String params = "?secret=6LdPurMjAAAAACUGZWKWpp-nNF45GQ9Lw631Ksi8&response=" + captcha;
+        ReCaptchaResponse reCaptchaResponse =restTemplate.exchange(url + params, HttpMethod.POST,
+                null, ReCaptchaResponse.class).getBody();
+        if (reCaptchaResponse.getSuccess()) {
+            Validation.checkPayment(paymentDTO.getCardNumber(), paymentDTO.getCvv2(), paymentDTO.getExpiredTime(), paymentDTO.getPassword());
+            return "done";
+        }
+        return "invalid captcha";
+    }
+
 }

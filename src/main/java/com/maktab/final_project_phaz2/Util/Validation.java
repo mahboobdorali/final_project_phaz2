@@ -1,18 +1,19 @@
 package com.maktab.final_project_phaz2.Util;
 
-import com.maktab.final_project_phaz2.exception.InputInvalidException;
+import com.maktab.final_project_phaz2.exception.RequestIsNotValidException;
+
+import java.time.LocalDate;
+import java.util.regex.Pattern;
 
 public class Validation {
-    public static void emailIsValid(String email) throws InputInvalidException {
-        if (!email.equals("") && email.matches("^(?!.*((?:(?<![\\w.\\-+%])[\\w._%+-]+@[\\w.-]+.[a-zA-Z]{2,}\\b)).*\\b\\1\\b)(?:[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})(?:,(?:[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}))*$\n"))
-            return;
-        throw new InputInvalidException("your email address is not valid");
-    }
-
-    public static void passwordIsValid(String password) throws InputInvalidException {
-        if (!password.equals("") && password.matches("^(?=.*[0-9])(?=.*[a-z])(?=\\S+$).{8}$"))
-            return;
-        throw new InputInvalidException("your password must be a combination of letters and numbers with " +
-                "a length 8!!");
+    public static void checkPayment(String cardNumber, String cvv2, LocalDate expiredDate, String password) {
+        if(!Pattern.matches("[0-9]{16}", cardNumber))
+            throw new RequestIsNotValidException("Wrong credit card number");
+        if(!Pattern.matches("[0-9]{3,6}",cvv2))
+            throw new RequestIsNotValidException("Wrong cvv2");
+        if(expiredDate.isBefore(LocalDate.now()))
+            throw new RequestIsNotValidException("Wrong expired date");
+        if(!Pattern.matches("[0-9]{4,8}",password))
+            throw new RequestIsNotValidException("Wrong password");
     }
 }

@@ -34,13 +34,13 @@ public class ServiceUnderService {
         return underServiceRepository.findAll();
     }
 
-    public UnderService addUnderServiceByAdmin(UnderService underService, Long serviceId) {
+    public void addUnderServiceByAdmin(UnderService underService, Long serviceId) {
         Optional<UnderService> byNameSubService = underServiceRepository.findByNameSubService(underService.getNameSubService());
         MainTask serviceById = mainTaskService.findServiceById(serviceId);
         if (byNameSubService.isPresent())
             throw new DuplicateEntryException("this UnderService already exist");
         underService.setMainTask(serviceById);
-        return underServiceRepository.save(underService);
+        underServiceRepository.save(underService);
     }
 
     public UnderService findUnderServiceByName(String underServiceName) {

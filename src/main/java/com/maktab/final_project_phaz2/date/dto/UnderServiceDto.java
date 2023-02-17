@@ -1,9 +1,6 @@
 package com.maktab.final_project_phaz2.date.dto;
 
-import com.maktab.final_project_phaz2.date.model.MainTask;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
 @Getter
@@ -11,6 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UnderServiceDto {
 
     private String nameSubService;

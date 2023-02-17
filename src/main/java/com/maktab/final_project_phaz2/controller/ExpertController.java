@@ -3,11 +3,11 @@ package com.maktab.final_project_phaz2.controller;
 import com.maktab.final_project_phaz2.date.dto.*;
 import com.maktab.final_project_phaz2.date.model.Expert;
 import com.maktab.final_project_phaz2.date.model.Offer;
-import com.maktab.final_project_phaz2.date.model.OrderCustomer;
-import com.maktab.final_project_phaz2.date.model.UnderService;
+import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import com.maktab.final_project_phaz2.service.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -31,9 +31,10 @@ public class ExpertController {
     private final OpinionService opinionService;
     private final OrderService orderService;
     private final ImageService imageService;
+    private final OfferService offerService;
 
     @PostMapping("/add_expert")
-    public ResponseEntity<String> addExpert(@RequestBody ExpertDto expertDto) {
+    public ResponseEntity<String> addExpert(@Valid @RequestBody ExpertDto expertDto) {
         Expert expert = mapper.map(expertDto, Expert.class);
         expertService.registerExpert(expert);
         return ResponseEntity.ok().body("**you are registered as an expert**");
@@ -47,7 +48,7 @@ public class ExpertController {
     }
 
     @PutMapping("/update_expert")
-    public ResponseEntity<ExpertDto> update(@RequestBody ExpertDto expertDto) {
+    public ResponseEntity<ExpertDto> update(@Valid @RequestBody ExpertDto expertDto) {
         Expert expert = mapper.map(expertDto, Expert.class);
         Expert expert1 = expertService.updateExpert(expert);
         ExpertDto expertDto1 = mapper.map(expert1, ExpertDto.class);
@@ -55,7 +56,7 @@ public class ExpertController {
     }
 
     @DeleteMapping("/delete_expert")
-    public ResponseEntity<String> delete(@RequestBody ExpertDto expertDto) {
+    public ResponseEntity<String> delete(@Valid @RequestBody ExpertDto expertDto) {
         Expert expert = mapper.map(expertDto, Expert.class);
         expertService.deleteExpert(expert);
         return ResponseEntity.ok().body("expert delete :)");
@@ -89,7 +90,7 @@ public class ExpertController {
     }
 
     @PostMapping("/save-offer")
-    public ResponseEntity<String> offerAnSubmitByExpert(@RequestBody OfferDto offerDto, @RequestParam("idUnderService") Long idUnderService,
+    public ResponseEntity<String> offerAnSubmitByExpert(@Valid @RequestBody OfferDto offerDto, @RequestParam("idUnderService") Long idUnderService,
                                                         @RequestParam("idOrder") Long idOrder) {
         Offer offer = mapper.map(offerDto, Offer.class);
         expertService.OfferAnSubmit(offer, idUnderService, idOrder);
@@ -128,6 +129,13 @@ public class ExpertController {
                 .map(orderCustomer -> mapper.map(orderCustomer, OrderDto.class)).collect(Collectors.toList()));
     }
 
+    @GetMapping("/list-orders-for-payed")
+    public ResponseEntity<List<OrderDto>> ListOrderCustomerForPayed(@RequestParam("currentSituation") CurrentSituation currentSituation
+            , @RequestParam("emailAddress") String emailAddress) {
+        return ResponseEntity.ok().body(orderService.findOrderByStatusForPayedByCustomer(emailAddress, currentSituation).stream()
+                .map(orderCustomer -> mapper.map(orderCustomer, OrderDto.class)).collect(Collectors.toList()));
+    }
+
     @GetMapping("/show-orders")
     public ResponseEntity<List<OpinionShowScoreDto>> ListOrder(@RequestParam("emailAddress") String emailAddress) {
         return ResponseEntity.ok().body(opinionService.showOrdersToExpert(emailAddress).stream()
@@ -143,6 +151,23 @@ public class ExpertController {
     @GetMapping("/get-image")
     public ResponseEntity<byte[]> getImageFromDatabase(@RequestParam("emailAddress") String emailAddress) {
         byte[] image = imageService.getImage(emailAddress);
-   return ResponseEntity.ok().contentType(MediaType.valueOf("image/jpeg")).body(image);
+        return ResponseEntity.ok().contentType(MediaType.valueOf("image/jpeg")).body(image);
+    }
+
+    @GetMapping("/get-all-new-expert")
+    public ResponseEntity<List<ExpertDtoForFilter>> findAllExpertNewStatus(@RequestParam("status") ApprovalStatus status) {
+        return ResponseEntity.ok().body(expertService.findAllByNewStatus(status).stream()
+                .map(expert -> mapper.map(expert, ExpertDtoForFilter.class)).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/show-alone-score")
+    public ResponseEntity<Long>showExpertScore(@RequestParam("expertEmail") String expertEmail) {
+        return ResponseEntity.ok().body(expertService.showScoreWithoutDescription(expertEmail));
+    }
+
+    @GetMapping("/show-all-offer-by-expert")
+    public ResponseEntity<List<OfferDto>> showAllExpertOffer(@RequestParam("emailAddress") String emailAddress) {
+        return ResponseEntity.ok().body(offerService.showAllOfferByExpert(emailAddress).stream()
+                .map(offer -> mapper.map(offer, OfferDto.class)).collect(Collectors.toList()));
     }
 }

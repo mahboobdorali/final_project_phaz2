@@ -12,6 +12,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @SuperBuilder
 public class UnderService extends BaseEntity {
+
     @Column(unique = true)
     private String nameSubService;
 
@@ -23,3 +24,11 @@ public class UnderService extends BaseEntity {
     private MainTask MainTask;
 
 }
+
+
+
+
+
+
+
+

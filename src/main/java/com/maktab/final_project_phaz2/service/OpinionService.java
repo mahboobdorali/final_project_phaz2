@@ -1,9 +1,6 @@
 package com.maktab.final_project_phaz2.service;
 
-import com.maktab.final_project_phaz2.date.model.Expert;
 import com.maktab.final_project_phaz2.date.model.Opinion;
-import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
-import com.maktab.final_project_phaz2.date.model.enumuration.Role;
 import com.maktab.final_project_phaz2.date.repository.OpinionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

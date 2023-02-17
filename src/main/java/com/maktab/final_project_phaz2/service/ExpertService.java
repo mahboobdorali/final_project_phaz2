@@ -6,6 +6,7 @@ import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.date.model.enumuration.Role;
 import com.maktab.final_project_phaz2.date.repository.ExpertRepository;
+import com.maktab.final_project_phaz2.exception.DuplicateEntryException;
 import com.maktab.final_project_phaz2.exception.InputInvalidException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import com.maktab.final_project_phaz2.exception.RequestIsNotValidException;
@@ -13,8 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.*;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,9 +26,16 @@ public class ExpertService {
     private final ServiceUnderService underService;
 
     public void registerExpert(Expert expert) {
+        Optional<Expert> expertByEmailAddress = expertRepository.findByEmailAddress(expert.getEmailAddress());
+        if (expertByEmailAddress.isPresent())
+            throw new DuplicateEntryException("this expert is already registered in system");
         expert.setRole(Role.EXPERT);
         expert.setApprovalStatus(ApprovalStatus.NEW);
         expertRepository.save(expert);
+    }
+
+    public List<Expert> findAllByNewStatus(ApprovalStatus status) {
+        return expertRepository.findAllByNewStatus(status);
     }
 
     public void deleteExpert(Expert expert) {
@@ -108,6 +116,11 @@ public class ExpertService {
         Offer offer = offerService.findById(idOffer);
         Expert expertById = findExpertById(idExpert);
         offer.setExpert(expertById);
+    }
+
+    public Long showScoreWithoutDescription(String emailExpert) {
+        Expert expertByEmail = findExpertByEmail(emailExpert);
+       return expertByEmail.getAverageScore();
     }
 }
 

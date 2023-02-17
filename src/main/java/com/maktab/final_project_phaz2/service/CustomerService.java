@@ -1,13 +1,14 @@
 package com.maktab.final_project_phaz2.service;
 
 import com.maktab.final_project_phaz2.Util.DateUtil;
-import com.maktab.final_project_phaz2.date.dto.CreditCardDto;
+//import com.maktab.final_project_phaz2.date.dto.CreditCardDto;
 import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.date.model.enumuration.Role;
 import com.maktab.final_project_phaz2.date.repository.CustomerRepository;
 import com.maktab.final_project_phaz2.date.repository.OfferRepository;
+import com.maktab.final_project_phaz2.exception.DuplicateEntryException;
 import com.maktab.final_project_phaz2.exception.InputInvalidException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import com.maktab.final_project_phaz2.exception.RequestIsNotValidException;
@@ -15,10 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 
 @Service
@@ -32,9 +30,12 @@ public class CustomerService {
     private final MainTaskService mainTaskService;
     private final OpinionService opinionService;
     private final ExpertService expertService;
-    private Set<CreditCardDto> creditCardDtos = new HashSet<CreditCardDto>();
+
 
     public void registerCustomer(Customer customer) {
+        Optional<Customer> byEmailAddress = customerRepository.findByEmailAddress(customer.getEmailAddress());
+        if (byEmailAddress.isPresent())
+            throw new DuplicateEntryException("you have already registered once in the system");
         customer.setRole(Role.CUSTOMER);
         customerRepository.save(customer);
     }
@@ -129,12 +130,13 @@ public class CustomerService {
         offerService.updateOffer(offerId);
     }
 
-    public void setDoneDate(Date doneDate, Long idOffer) {
+    public void setDoneDate(Date doneDate, Long idOffer, Long idOrder) {
         Offer offer = offerService.findById(idOffer);
+        OrderCustomer order = orderService.findOrderById(idOrder);
         if (doneDate.before(offer.getTimeProposeToStartWork()))
             throw new NoResultException("the entered time is before the time suggested by the expert");
-        offer.getOrderCustomer().setWorkDone(doneDate);
-        offerService.saveAllOffer(offer);
+        order.setWorkDone(doneDate);
+        orderService.saveAllOrder(order);
     }
 
     public void changeSituationForFinish(Long id) {
@@ -165,18 +167,12 @@ public class CustomerService {
         registerCustomer(customerByEmail);
     }
 
-    public void OnlinePaymentByCustomer(CreditCardDto creditCardDto) {
-        creditCardDtos.add(creditCardDto);
-
-    }
-
-    public void saveComments(Long idOffer, Opinion opinion) {
-        Offer byId = offerService.findById(idOffer);
+    public void saveComments(Long idExpert, Opinion opinion) {
+        Expert byId = expertService.findExpertById(idExpert);
         if (opinion.getScore() < 1 || opinion.getScore() > 6)
             throw new RequestIsNotValidException("the score entered must be a number between one and five(1-5");
-        opinion.setExpert(byId.getExpert());
         opinionService.registerOpinion(opinion);
-        byId.getExpert().setAverageScore(opinion.getScore());
-        expertService.updateExpert(byId.getExpert());
+        byId.setAverageScore(byId.getAverageScore() + opinion.getScore());
+        expertService.updateExpert(byId);
     }
 }

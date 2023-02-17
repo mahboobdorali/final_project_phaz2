@@ -8,12 +8,13 @@ import lombok.*;
 
 @Getter
 @Setter
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ExpertDto {
-    private double averageScore;
+public class ExpertDtoForFilter {
+    @Email
+    private String emailAddress;
 
     @Pattern(regexp = "^[A-Za-z]{3,29}$")
     private String name;
@@ -21,17 +22,6 @@ public class ExpertDto {
     @Pattern(regexp = "^[A-Za-z]{3,29}$")
     private String family;
 
-    @Email
-    private String emailAddress;
-
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=\\S+$).{8}$")
-    private String password;
-
-    private double amount;
-
-    private byte[] image;
-
     private ApprovalStatus approvalStatus;
 
 }
-

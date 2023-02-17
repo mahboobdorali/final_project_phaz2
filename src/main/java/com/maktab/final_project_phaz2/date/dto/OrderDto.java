@@ -1,8 +1,8 @@
 package com.maktab.final_project_phaz2.date.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
-import jakarta.persistence.Embedded;
 import lombok.*;
 
 import java.util.Date;
@@ -12,6 +12,7 @@ import java.util.Date;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderDto {
 
     private double proposedPrice;

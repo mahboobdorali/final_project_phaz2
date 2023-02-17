@@ -19,8 +19,8 @@ import java.util.List;
 @SuperBuilder
 public class Customer extends Person implements Serializable {
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer",cascade = CascadeType.PERSIST)
-    private List<OrderCustomer> orderCustomerList=new ArrayList<>();
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer", cascade = CascadeType.PERSIST)
+    private List<OrderCustomer> orderCustomerList = new ArrayList<>();
 
     public Customer(String name, String family, String emailAddress,
                     String password, Role role,

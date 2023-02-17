@@ -1,16 +1,14 @@
 package com.maktab.final_project_phaz2.controller;
 
-import com.maktab.final_project_phaz2.date.dto.ExpertDto;
 import com.maktab.final_project_phaz2.date.dto.SearchExpertDto;
 import com.maktab.final_project_phaz2.date.dto.ServiceDto;
 import com.maktab.final_project_phaz2.date.dto.UnderServiceDto;
-import com.maktab.final_project_phaz2.date.model.Expert;
 import com.maktab.final_project_phaz2.date.model.MainTask;
 import com.maktab.final_project_phaz2.date.model.UnderService;
-import com.maktab.final_project_phaz2.date.repository.ExpertRepository;
 import com.maktab.final_project_phaz2.service.AdminService;
 import com.maktab.final_project_phaz2.service.MainTaskService;
 import com.maktab.final_project_phaz2.service.ServiceUnderService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -28,11 +26,10 @@ public class AdminController {
     private final ServiceUnderService serviceUnderService;
     private final MainTaskService mainTaskService;
     private final AdminService adminService;
-    private final ExpertRepository expertRepository;
 
 
     @PostMapping("/add-under-service")
-    public ResponseEntity<String> addUnderService(@RequestBody UnderServiceDto underServiceDto, @RequestParam Long idService) {
+    public ResponseEntity<String> addUnderService(@Valid @RequestBody UnderServiceDto underServiceDto, @RequestParam Long idService) {
         UnderService underService = mapper.map(underServiceDto, UnderService.class);
         serviceUnderService.addUnderServiceByAdmin(underService, idService);
         return ResponseEntity.ok().body("**this underService add By admin**");
@@ -40,7 +37,7 @@ public class AdminController {
 
 
     @PostMapping("/add-Service")
-    public ResponseEntity<String> addService(@RequestBody ServiceDto ServiceDto) {
+    public ResponseEntity<String> addService(@Valid @RequestBody ServiceDto ServiceDto) {
         MainTask mainTask = mapper.map(ServiceDto, MainTask.class);
         mainTaskService.addServiceByAdmin(mainTask);
         return ResponseEntity.ok().body("**this Service add By admin**");
@@ -102,7 +99,7 @@ public class AdminController {
     }
 
     @GetMapping("/search-by-admin")
-    public ResponseEntity<List<SearchExpertDto>> filterAdmin(@RequestBody SearchExpertDto expert) {
+    public ResponseEntity<List<SearchExpertDto>> filterAdmin(@Valid @RequestBody SearchExpertDto expert) {
         return ResponseEntity.ok().body(adminService.filterExpertByCondition(expert).stream().
                 map(expert1-> mapper.map(expert1,SearchExpertDto.class)).collect(Collectors.toList()));
     }
