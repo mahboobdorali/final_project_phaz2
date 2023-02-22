@@ -1,11 +1,14 @@
 package com.maktab.final_project_phaz2.service;
 
 import com.maktab.final_project_phaz2.date.dto.SearchExpertDto;
+import com.maktab.final_project_phaz2.date.model.Admin;
 import com.maktab.final_project_phaz2.date.model.Expert;
 import com.maktab.final_project_phaz2.date.model.MainTask;
 import com.maktab.final_project_phaz2.date.model.UnderService;
 import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
+import com.maktab.final_project_phaz2.date.model.enumuration.Role;
 import com.maktab.final_project_phaz2.date.repository.ExpertRepository;
+import com.maktab.final_project_phaz2.exception.DuplicateEntryException;
 import com.maktab.final_project_phaz2.exception.RequestIsNotValidException;
 import com.maktab.final_project_phaz2.exception.SourceUsageRestrictionsException;
 import jakarta.persistence.criteria.Join;
@@ -17,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +29,7 @@ public class AdminService {
     private final MainTaskService mainTaskService;
     private final ExpertService expertService;
     private final ExpertRepository expertRepository;
+
 
 
     public List<MainTask> showAllOfMainServiceByAdmin() {
