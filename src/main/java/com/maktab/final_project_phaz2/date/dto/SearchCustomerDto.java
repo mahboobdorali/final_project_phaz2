@@ -1,8 +1,12 @@
 package com.maktab.final_project_phaz2.date.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.maktab.final_project_phaz2.date.model.enumuration.Role;
 import lombok.*;
+
+import java.time.LocalDate;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -10,7 +14,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class SearchExpertDto {
+public class SearchCustomerDto {
 
     private String name;
 
@@ -20,13 +24,11 @@ public class SearchExpertDto {
 
     private Role role;
 
-    private long minScore;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDate beforeTime;
 
-    private long maxScore;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDate afterTime;
 
-    private double amount;
-
-    private String nameSubService;
-
-    private double averageScore;
+    private Date dateAndTimeOfRegistration;
 }
