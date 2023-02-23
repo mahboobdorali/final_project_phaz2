@@ -13,9 +13,8 @@ import java.util.Optional;
 @Repository
 public interface ExpertRepository extends JpaRepository<Expert, Long>, JpaSpecificationExecutor<Expert> {
     Optional<Expert> findByEmailAddress(String emailAddress);
-
-    Optional<Expert> findById(Long idExpert);
-
+    @Query("SELECT e FROM Expert e WHERE e.verificationCode = ?1")
+     Expert findByVerificationCode(String code);
     @Query("select e from Expert e where e.approvalStatus=:approvalStatus")
     List<Expert> findAllByNewStatus(ApprovalStatus approvalStatus);
 

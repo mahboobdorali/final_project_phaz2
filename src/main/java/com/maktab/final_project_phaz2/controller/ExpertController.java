@@ -7,6 +7,8 @@ import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import com.maktab.final_project_phaz2.service.*;
+import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -34,14 +36,30 @@ public class ExpertController {
     private final OfferService offerService;
 
     @PostMapping("/add_expert")
-    public ResponseEntity<String> addExpert(@Valid @RequestBody ExpertDto expertDto) {
+    public ResponseEntity<String> addExpert(@Valid @RequestBody ExpertDto expertDto
+            , HttpServletRequest request) throws MessagingException {
         Expert expert = mapper.map(expertDto, Expert.class);
-        expertService.registerExpert(expert);
+        expertService.registerExpert(expert, getSiteURL(request));
         return ResponseEntity.ok().body("**you are registered as an expert**");
     }
 
+    private String getSiteURL(HttpServletRequest request) {
+        String siteURL = request.getRequestURL().toString();
+        return siteURL.replace(request.getServletPath(), "");
+    }
+
+    @GetMapping("/verify")
+    public String verifyUser(@RequestParam("code") String code) {
+        if (expertService.verify(code)) {
+            return "verify_success";
+        } else {
+            return "verify_fail";
+        }
+    }
+
     @GetMapping("/logIn_expert")
-    public ResponseEntity<UserDto> getByEmailAddress(@RequestParam("emailAddress") String emailAddress, @RequestParam("password") String password) throws NoResultException {
+    public ResponseEntity<UserDto> getByEmailAddress(@RequestParam("emailAddress") String emailAddress,
+                                                     @RequestParam("password") String password) throws NoResultException {
         Expert expert = expertService.logInExpert(emailAddress, password);
         UserDto signIn = mapper.map(expert, UserDto.class);
         return ResponseEntity.ok().body(signIn);
@@ -83,9 +101,8 @@ public class ExpertController {
     }
 
     @PutMapping("/change_password")
-    public ResponseEntity<String> changePassword(@RequestParam("emailAddress") String emailAddress,
-                                                 @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword) {
-        expertService.changePassword(emailAddress, oldPassword, newPassword);
+    public ResponseEntity<String> changePassword(@Valid @RequestBody PasswordDto passwordDto) {
+        expertService.changePassword(passwordDto.getOldPassword(), passwordDto.getNewPassword());
         return ResponseEntity.ok().body("password changed :)");
     }
 
@@ -98,8 +115,8 @@ public class ExpertController {
     }
 
     @PostMapping("/set-expert-id")
-    public ResponseEntity<String> setExpert(@RequestParam Long idOffer, @RequestParam Long idExpert) {
-        expertService.setExpertToOffer(idOffer, idExpert);
+    public ResponseEntity<String> setExpert(@RequestParam Long idOffer) {
+        expertService.setExpertToOffer(idOffer);
         return ResponseEntity.ok().body("this expert offer an submit");
     }
 
@@ -110,8 +127,8 @@ public class ExpertController {
     }
 
     @PostMapping("/add-expert-to-under-service")
-    public ResponseEntity<String> addExpertToUnderServiceByAdmin(@RequestParam("idUnderService") Long idUnderService, @RequestParam("idExpert") Long idExpert) {
-        adminService.addExpertToUnderService(idUnderService, idExpert);
+    public ResponseEntity<String> addExpertToUnderServiceByAdmin(@RequestBody AddExpertToUnderDto addExpertToUnderDto) {
+        adminService.addExpertToUnderService(addExpertToUnderDto.getIdUnderService(), addExpertToUnderDto.getIdExpert());
         return ResponseEntity.ok().body("this expert add to underService");
     }
 
@@ -136,9 +153,9 @@ public class ExpertController {
                 .map(orderCustomer -> mapper.map(orderCustomer, OrderDto.class)).collect(Collectors.toList()));
     }
 
-    @GetMapping("/show-orders")
-    public ResponseEntity<List<OpinionShowScoreDto>> ListOrder(@RequestParam("emailAddress") String emailAddress) {
-        return ResponseEntity.ok().body(opinionService.showOrdersToExpert(emailAddress).stream()
+    @GetMapping("/show-scores")
+    public ResponseEntity<List<OpinionShowScoreDto>> ListOrder() {
+        return ResponseEntity.ok().body(opinionService.showOpinionToExpert().stream()
                 .map(opinion -> mapper.map(opinion, OpinionShowScoreDto.class)).collect(Collectors.toList()));
     }
 
@@ -161,13 +178,23 @@ public class ExpertController {
     }
 
     @GetMapping("/show-alone-score")
-    public ResponseEntity<Long>showExpertScore(@RequestParam("expertEmail") String expertEmail) {
-        return ResponseEntity.ok().body(expertService.showScoreWithoutDescription(expertEmail));
+    public ResponseEntity<Long> showExpertScore() {
+        return ResponseEntity.ok().body(expertService.showScoreWithoutDescription());
     }
 
     @GetMapping("/show-all-offer-by-expert")
     public ResponseEntity<List<OfferDto>> showAllExpertOffer(@RequestParam("emailAddress") String emailAddress) {
         return ResponseEntity.ok().body(offerService.showAllOfferByExpert(emailAddress).stream()
                 .map(offer -> mapper.map(offer, OfferDto.class)).collect(Collectors.toList()));
+    }
+    @GetMapping("/show-credit-expert")
+    public ResponseEntity<Double> showExpertAmount(){
+        return ResponseEntity.ok().body(expertService.showAmountToExpert());
+    }
+    @GetMapping("/show-all-order-for-expert")
+    public ResponseEntity<List<OrderCustomerDto>> showAllOrderForCustomer(@RequestParam("emailExpert")String emailExpert,
+                                                                          @RequestParam("currentSituation")CurrentSituation currentSituation){
+        return ResponseEntity.ok().body(orderService.showAllOrderExpert(emailExpert, currentSituation).stream().
+                map(orderCustomer -> mapper.map(orderCustomer,OrderCustomerDto.class)).collect(Collectors.toList()));
     }
 }

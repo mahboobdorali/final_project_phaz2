@@ -20,7 +20,7 @@ public class Expert extends Person implements Serializable {
 
     private long averageScore;
 
-    @OneToOne(fetch = FetchType.LAZY,cascade = CascadeType.PERSIST)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     private Image image;
 
     @Enumerated(EnumType.STRING)
@@ -34,4 +34,8 @@ public class Expert extends Person implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "expert", cascade = CascadeType.PERSIST)
     private List<OrderCustomer> ordersCustomer = new ArrayList<>();
+
+    private String verificationCode;
+
+    private boolean enabled;
 }
