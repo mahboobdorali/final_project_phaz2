@@ -1,8 +1,10 @@
 package com.maktab.final_project_phaz2.service;
 
 import com.maktab.final_project_phaz2.date.model.Opinion;
+import com.maktab.final_project_phaz2.date.model.Person;
 import com.maktab.final_project_phaz2.date.repository.OpinionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,7 +30,8 @@ public class OpinionService {
         return opinionRepository.findAll();
     }
 
-    public List<Opinion> showOrdersToExpert(String emailAddress) {
-        return opinionRepository.showAllScore(emailAddress);
+    public List<Opinion> showOpinionToExpert() {
+        return opinionRepository.showAllScore(((Person) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal()).getEmailAddress());
     }
 }

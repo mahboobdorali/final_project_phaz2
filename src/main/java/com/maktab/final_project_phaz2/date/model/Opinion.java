@@ -18,7 +18,7 @@ public class Opinion extends BaseEntity {
     private Expert expert;
 
     @Column(nullable = false)
-    /*  @Size(max=5,min = 1)*/
+    /* @Size(max=5,min = 1)*/
     private long score;
 
     private String comment;
