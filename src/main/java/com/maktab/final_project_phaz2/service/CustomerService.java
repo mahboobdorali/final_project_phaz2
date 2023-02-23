@@ -2,6 +2,7 @@ package com.maktab.final_project_phaz2.service;
 
 import com.maktab.final_project_phaz2.Util.DateUtil;
 //import com.maktab.final_project_phaz2.date.dto.CreditCardDto;
+import com.maktab.final_project_phaz2.date.dto.SearchCustomerDto;
 import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
@@ -12,7 +13,11 @@ import com.maktab.final_project_phaz2.exception.DuplicateEntryException;
 import com.maktab.final_project_phaz2.exception.InputInvalidException;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import com.maktab.final_project_phaz2.exception.RequestIsNotValidException;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,16 +32,17 @@ public class CustomerService {
     private final OfferRepository offerRepository;
     private final OfferService offerService;
     private final ServiceUnderService underService;
-    private final MainTaskService mainTaskService;
     private final OpinionService opinionService;
     private final ExpertService expertService;
 
+    private final PasswordEncoder passwordEncoder;
 
     public void registerCustomer(Customer customer) {
         Optional<Customer> byEmailAddress = customerRepository.findByEmailAddress(customer.getEmailAddress());
         if (byEmailAddress.isPresent())
             throw new DuplicateEntryException("you have already registered once in the system");
         customer.setRole(Role.CUSTOMER);
+        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
         customerRepository.save(customer);
     }
 
@@ -71,8 +77,9 @@ public class CustomerService {
                 orElseThrow(() -> new NoResultException("this customer dose not exist"));
     }
 
-    public void changePassword(String emailAddress, String oldPassword, String newPassword) {
-        Customer customer = customerRepository.findByEmailAddress(emailAddress).
+    public void changePassword(String oldPassword, String newPassword) {
+        Customer customer = customerRepository.findByEmailAddress(((Person) SecurityContextHolder.getContext()
+                        .getAuthentication().getPrincipal()).getEmailAddress()).
                 orElseThrow(() -> new NoResultException(" this customer dose not exist"));
         if (!(customer.getPassword().equals(oldPassword)))
             throw new RequestIsNotValidException("is not exist password");
@@ -80,18 +87,11 @@ public class CustomerService {
         customerRepository.save(customer);
     }
 
-    public UnderService showUnderByName(String nameOfUnder) {
-        return underService.findUnderServiceByName(nameOfUnder);
-    }
-
-    public MainTask showAllServiceByName(String nameOfService) {
-        return mainTaskService.findServiceByName(nameOfService);
-    }
-
     @Transactional
-    public void Order(OrderCustomer ordersCustomer, Long idOfChoiceUnderService, Long idCustomer) {
+    public void Order(OrderCustomer ordersCustomer, Long idOfChoiceUnderService) {
         UnderService serviceById = underService.findUnderServiceById(idOfChoiceUnderService);
-        Customer customerById = findCustomerById(idCustomer);
+        Customer customerById = findCustomerById(((Person) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal()).getId());
         if (ordersCustomer.getProposedPrice() < serviceById.getBasePrice())
             throw new RequestIsNotValidException("the entered price is lower than the allowed limit!!");
         if (DateUtil.isNotDateValid(ordersCustomer.getDateAndTimeOfWork()))
@@ -154,25 +154,48 @@ public class CustomerService {
         offerService.updateOffer(offer);
     }
 
-    public void paymentFromCredit(Long idChoiceOffer, String emailCustomer) {
+    public void paymentFromCredit(Long idChoiceOffer) {
         Offer offerById = offerService.findById(idChoiceOffer);
-        Customer customerByEmail = findCustomerByEmail(emailCustomer);
+        Customer customerByEmail = findCustomerByEmail(((Person) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal()).getEmailAddress());
         if (offerById.getPriceOffer() > customerByEmail.getAmount())
             throw new RequestIsNotValidException("price offer is more than stock!!");
         customerByEmail.setAmount(customerByEmail.getAmount() - offerById.getPriceOffer());
         double percent = (offerById.getPriceOffer() / 100) * 70;
         offerById.getExpert().setAmount(percent);
         offerById.getOrderCustomer().setCurrentSituation(CurrentSituation.PAID);
-        offerService.saveAllOffer(offerById);
+        offerService.updateOffer(offerById);
         registerCustomer(customerByEmail);
     }
 
-    public void saveComments(Long idExpert, Opinion opinion) {
+    public void saveComments(Opinion opinion,Long idExpert) {
         Expert byId = expertService.findExpertById(idExpert);
         if (opinion.getScore() < 1 || opinion.getScore() > 6)
             throw new RequestIsNotValidException("the score entered must be a number between one and five(1-5");
         opinionService.registerOpinion(opinion);
         byId.setAverageScore(byId.getAverageScore() + opinion.getScore());
         expertService.updateExpert(byId);
+    }
+
+    public List<Customer> filterCustomerByCondition(SearchCustomerDto customer) {
+        return customerRepository.findAll((Specification<Customer>) (root, query, criteriaBuilder) -> {
+            List<Predicate> predicate = new ArrayList<>();
+            if (customer.getName() != null && customer.getName().length() != 0)
+                predicate.add(criteriaBuilder.equal(root.get("name"), customer.getName()));
+            if (customer.getFamily() != null && customer.getFamily().length() != 0)
+                predicate.add(criteriaBuilder.equal(root.get("family"), customer.getFamily()));
+            if (customer.getRole() != null)
+                predicate.add(criteriaBuilder.equal(root.get("role"), customer.getRole()));
+            if (customer.getEmailAddress() != null && customer.getEmailAddress().length() != 0)
+                predicate.add(criteriaBuilder.equal(root.get("emailAddress"), customer.getEmailAddress()));
+            if (customer.getAfterTime() != null && customer.getBeforeTime() != null)
+                predicate.add(criteriaBuilder.between(root.get("dateAndTimeOfRegistration"), customer.getAfterTime(), customer.getBeforeTime()));
+            return criteriaBuilder.and(predicate.toArray(new Predicate[0]));
+        });
+    }
+    public double showAmountToCustomer() {
+        Customer customer = findCustomerByEmail(((Person) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal()).getEmailAddress());
+        return customer.getAmount();
     }
 }

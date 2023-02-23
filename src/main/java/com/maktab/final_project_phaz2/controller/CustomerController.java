@@ -3,8 +3,10 @@ package com.maktab.final_project_phaz2.controller;
 import com.maktab.final_project_phaz2.Util.Validation;
 import com.maktab.final_project_phaz2.date.dto.*;
 import com.maktab.final_project_phaz2.date.model.*;
+import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import com.maktab.final_project_phaz2.service.CustomerService;
+import com.maktab.final_project_phaz2.service.OrderService;
 import com.maktab.final_project_phaz2.service.ServiceUnderService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -27,6 +29,8 @@ public class CustomerController {
     private final CustomerService customerService;
     private final ServiceUnderService underService;
     private final RestTemplate restTemplate;
+
+    private final OrderService orderService;
 
     @PostMapping("/add_customer")
     public ResponseEntity<String> addCustomer(@Valid @RequestBody CustomerDto customerDto) {
@@ -51,7 +55,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/delete_customer")
-    public ResponseEntity<String> delete( @Valid @RequestBody CustomerDto customerDto) {
+    public ResponseEntity<String> delete(@Valid @RequestBody CustomerDto customerDto) {
         Customer customer = mapper.map(customerDto, Customer.class);
         customerService.deleteCustomer(customer);
         return ResponseEntity.ok().body("customer deleted");
@@ -79,17 +83,15 @@ public class CustomerController {
     }
 
     @PutMapping("/change_password")
-    public ResponseEntity<String> changePassword(@RequestParam("emailAddress") String emailAddress,
-                                                 @RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword) {
-        customerService.changePassword(emailAddress, oldPassword, newPassword);
+    public ResponseEntity<String> changePassword(@Valid @RequestBody PasswordDto passwordDto) {
+        customerService.changePassword(passwordDto.getOldPassword(), passwordDto.getNewPassword());
         return ResponseEntity.ok().body("password changed :)");
     }
 
     @PostMapping("/save_order")
-    public ResponseEntity<String> saveOrder(@RequestBody OrderDto orderDto, @RequestParam Long idUnderService
-            , @RequestParam Long idCustomer) {
+    public ResponseEntity<String> saveOrder(@RequestBody OrderDto orderDto, @RequestParam Long idUnderService) {
         OrderCustomer orderCustomer = mapper.map(orderDto, OrderCustomer.class);
-        customerService.Order(orderCustomer, idUnderService, idCustomer);
+        customerService.Order(orderCustomer, idUnderService);
         return ResponseEntity.ok().body("this order saved :)");
     }
 
@@ -133,27 +135,27 @@ public class CustomerController {
     }
 
     @PutMapping("payment-from-credit")
-    public ResponseEntity<String> paidFromCustomerCredit(@RequestParam("idChoiceOffer") Long idChoiceOffer,
-                                                         @RequestParam("emailCustomer") String emailCustomer) {
-        customerService.paymentFromCredit(idChoiceOffer, emailCustomer);
+    public ResponseEntity<String> paidFromCustomerCredit(@RequestParam("idChoiceOffer") Long idChoiceOffer) {
+        customerService.paymentFromCredit(idChoiceOffer);
         return ResponseEntity.ok().body("your payment has been successfully completed!!");
     }
 
     @PostMapping("/save-score")
     public ResponseEntity<String> saveScoreForExpert(@RequestParam("idExpert") Long idExpert, @RequestBody OpinionDto opinionDto) {
         Opinion opinion = mapper.map(opinionDto, Opinion.class);
-        customerService.saveComments(idExpert, opinion);
+        customerService.saveComments(opinion, idExpert);
         return ResponseEntity.ok().body("*your score is save");
     }
 
     @PostMapping("/save-done-date")
     public ResponseEntity<String> saveDoneDateByCustomer(@Valid @RequestBody DateOrderCustomerDto dateOrderCustomerDto,
                                                          @RequestParam("idOffer") Long idOffer,
-                                                         @RequestParam("idOrder")Long idOrder) {
+                                                         @RequestParam("idOrder") Long idOrder) {
         OrderCustomer orderCustomer = mapper.map(dateOrderCustomerDto, OrderCustomer.class);
-        customerService.setDoneDate(orderCustomer.getWorkDone(), idOffer,idOrder);
+        customerService.setDoneDate(orderCustomer.getWorkDone(), idOffer, idOrder);
         return ResponseEntity.ok().body("*the completion time of the work was recorded by you");
     }
+
     @GetMapping("/pay/online")
     public String pay() {
         return "payment";
@@ -163,7 +165,7 @@ public class CustomerController {
     public @ResponseBody String payOnline(PaymentDto paymentDTO, @RequestParam("g-recaptcha-response") String captcha) {
         String url = "https://www.google.com/recaptcha/api/siteverify";
         String params = "?secret=6LdPurMjAAAAACUGZWKWpp-nNF45GQ9Lw631Ksi8&response=" + captcha;
-        ReCaptchaResponse reCaptchaResponse =restTemplate.exchange(url + params, HttpMethod.POST,
+        ReCaptchaResponse reCaptchaResponse = restTemplate.exchange(url + params, HttpMethod.POST,
                 null, ReCaptchaResponse.class).getBody();
         if (reCaptchaResponse.getSuccess()) {
             Validation.checkPayment(paymentDTO.getCardNumber(), paymentDTO.getCvv2(), paymentDTO.getExpiredTime(), paymentDTO.getPassword());
@@ -172,4 +174,21 @@ public class CustomerController {
         return "invalid captcha";
     }
 
+    @GetMapping("/search-customer-by-admin-")
+    public ResponseEntity<List<SearchCustomerDto>> filterCustomerByAdmin(@Valid @RequestBody SearchCustomerDto customer) {
+        return ResponseEntity.ok().body(customerService.filterCustomerByCondition(customer).stream().
+                map(customer1 -> mapper.map(customer1, SearchCustomerDto.class)).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/show-credit-customer")
+    public ResponseEntity<Double> showCustomerAmount() {
+        return ResponseEntity.ok().body(customerService.showAmountToCustomer());
+    }
+
+    @GetMapping("/show-all-order-for-customer")
+    public ResponseEntity<List<OrderCustomerDto>> showAllOrderForCustomer(@RequestParam("emailCustomer")String emailCustomer,
+                                                                          @RequestParam("currentSituation")CurrentSituation currentSituation){
+        return ResponseEntity.ok().body(orderService.showAllOrderCustomer(emailCustomer, currentSituation).stream().
+                map(orderCustomer -> mapper.map(orderCustomer,OrderCustomerDto.class)).collect(Collectors.toList()));
+    }
 }
