@@ -35,11 +35,11 @@ public class MainTaskService {
         return serviceRepository.findAll();
     }
 
-    public MainTask addServiceByAdmin(MainTask mainTask) {
+    public void addServiceByAdmin(MainTask mainTask) {
         Optional<MainTask> byName = serviceRepository.findByName(mainTask.getName());
         if (byName.isPresent())
             throw new DuplicateEntryException("this service already exist");
-        return serviceRepository.save(mainTask);
+        serviceRepository.save(mainTask);
     }
 
     public MainTask findServiceByName(String serviceName) {
