@@ -1,12 +1,13 @@
 package com.maktab.final_project_phaz2.controller;
 
-import com.maktab.final_project_phaz2.date.dto.SearchExpertDto;
-import com.maktab.final_project_phaz2.date.dto.ServiceDto;
-import com.maktab.final_project_phaz2.date.dto.UnderServiceDto;
+import com.maktab.final_project_phaz2.date.dto.*;
+import com.maktab.final_project_phaz2.date.model.Admin;
+import com.maktab.final_project_phaz2.date.model.Customer;
 import com.maktab.final_project_phaz2.date.model.MainTask;
 import com.maktab.final_project_phaz2.date.model.UnderService;
 import com.maktab.final_project_phaz2.service.AdminService;
 import com.maktab.final_project_phaz2.service.MainTaskService;
+import com.maktab.final_project_phaz2.service.OrderService;
 import com.maktab.final_project_phaz2.service.ServiceUnderService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -26,7 +27,14 @@ public class AdminController {
     private final ServiceUnderService serviceUnderService;
     private final MainTaskService mainTaskService;
     private final AdminService adminService;
+    private final OrderService orderService;
 
+    @PostMapping("/add_expert")
+    public ResponseEntity<String> addCustomer(@Valid @RequestBody AdminDto adminDto) {
+        Admin admin = mapper.map(adminDto, Admin.class);
+        adminService.registerAdmin(admin);
+        return ResponseEntity.ok().body("**you are registered as an admin**");
+    }
 
     @PostMapping("/add-under-service")
     public ResponseEntity<String> addUnderService(@Valid @RequestBody UnderServiceDto underServiceDto, @RequestParam Long idService) {
@@ -101,6 +109,16 @@ public class AdminController {
     @GetMapping("/search-by-admin")
     public ResponseEntity<List<SearchExpertDto>> filterAdmin(@Valid @RequestBody SearchExpertDto expert) {
         return ResponseEntity.ok().body(adminService.filterExpertByCondition(expert).stream().
-                map(expert1-> mapper.map(expert1,SearchExpertDto.class)).collect(Collectors.toList()));
+                map(expert1 -> mapper.map(expert1, SearchExpertDto.class)).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/count-of-order-customer")
+    public int countOfOrderCustomer(@Valid @RequestBody CountOrderDto countOrderDto) {
+        return orderService.countOrderOfCustomer(countOrderDto.getEmailAddress(), countOrderDto.getCurrentSituation());
+    }
+
+    @GetMapping("/count-of-order-expert")
+    public int countOfOrderExpert(@Valid @RequestBody CountOrderDto countOrderDto) {
+        return orderService.countOrderOfExpert(countOrderDto.getEmailAddress(), countOrderDto.getCurrentSituation());
     }
 }

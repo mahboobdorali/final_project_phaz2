@@ -1,12 +1,10 @@
 package com.maktab.final_project_phaz2.service;
 
 import com.maktab.final_project_phaz2.date.dto.SearchExpertDto;
-import com.maktab.final_project_phaz2.date.model.Admin;
-import com.maktab.final_project_phaz2.date.model.Expert;
-import com.maktab.final_project_phaz2.date.model.MainTask;
-import com.maktab.final_project_phaz2.date.model.UnderService;
+import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
 import com.maktab.final_project_phaz2.date.model.enumuration.Role;
+import com.maktab.final_project_phaz2.date.repository.AdminRepository;
 import com.maktab.final_project_phaz2.date.repository.ExpertRepository;
 import com.maktab.final_project_phaz2.exception.DuplicateEntryException;
 import com.maktab.final_project_phaz2.exception.RequestIsNotValidException;
@@ -29,8 +27,15 @@ public class AdminService {
     private final MainTaskService mainTaskService;
     private final ExpertService expertService;
     private final ExpertRepository expertRepository;
+    private final AdminRepository adminRepository;
 
-
+    public void registerAdmin(Admin admin) {
+        Optional<Admin> byEmailAddress = adminRepository.findByEmail(admin.getEmail());
+        if (byEmailAddress.isPresent())
+            throw new DuplicateEntryException("you have already registered once in the system");
+        admin.setRole(Role.ADMIN);
+        adminRepository.save(admin);
+    }
 
     public List<MainTask> showAllOfMainServiceByAdmin() {
 
@@ -52,21 +57,21 @@ public class AdminService {
     }
 
     @Transactional
-    public Expert addExpertToUnderService(Long idUnderService, Long idExpert) {
+    public void addExpertToUnderService(Long idUnderService, Long idExpert) {
         UnderService underService = serviceUnderService.findUnderServiceById(idUnderService);
         Expert expertById = expertService.findExpertById(idExpert);
-        if (expertById.getApprovalStatus().equals(ApprovalStatus.NEW))
+        if (expertById.getApprovalStatus().equals(ApprovalStatus.AWAITING_CONFIRMATION))
             throw new SourceUsageRestrictionsException("first admin should confirmed you!!");
         expertById.getUnderServiceList().add(underService);
-        return expertService.updateExpert(expertById);
+        expertService.updateExpert(expertById);
     }
 
     @Transactional
-    public Expert deleteExpertFromUnderService(Long idUnderService, Long idExpert) {
+    public void deleteExpertFromUnderService(Long idUnderService, Long idExpert) {
         UnderService underService = serviceUnderService.findUnderServiceById(idUnderService);
         Expert expertById = expertService.findExpertById(idExpert);
         expertById.getUnderServiceList().remove(underService);
-        return expertService.updateExpert(expertById);
+        expertService.updateExpert(expertById);
     }
 
     public void changeDescription(Long idUnderService, String newDescription) {
@@ -96,8 +101,10 @@ public class AdminService {
             if (expert.getNameSubService() != null && expert.getNameSubService().length() != 0)
                 predicateList.add(criteriaBuilder.equal(expertUnderServiceJoin.get("nameSubService"),
                         expert.getNameSubService()));
-            if (expert.getAverageScore() < 6)
-                query.orderBy(criteriaBuilder.desc(root.get("averageScore")));
+            if (expert.getMinScore() == 0 && expert.getMaxScore() != 0)
+                predicateList.add(criteriaBuilder.lt(root.get("averageScore"), expert.getMaxScore()));
+            if (expert.getMinScore() != 0 && expert.getMaxScore() == 0)
+                predicateList.add(criteriaBuilder.gt(root.get("averageScore"), expert.getMinScore()));
             return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
         });
     }

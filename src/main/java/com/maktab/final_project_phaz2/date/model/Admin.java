@@ -1,7 +1,10 @@
 package com.maktab.final_project_phaz2.date.model;
 
 
+import com.maktab.final_project_phaz2.date.model.enumuration.Role;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,6 +28,9 @@ public class Admin extends BaseEntity implements UserDetails {
     private String email;
 
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
