@@ -29,10 +29,10 @@ public class ImageService {
         expertService.updateExpert(expertById);
     }
 
-    public Image findImageById(Long id) {
+  /*  public Image findImageById(Long id) {
         return imageRepository.findById(id).
                 orElseThrow(() -> new NoResultException("this image dose not exist"));
-    }
+    }*/
 
     @Transactional
     public byte[] getImage(String emailAddress) {
