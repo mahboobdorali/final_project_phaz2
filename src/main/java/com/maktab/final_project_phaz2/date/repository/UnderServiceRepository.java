@@ -11,9 +11,6 @@ import java.util.Optional;
 @Repository
 public interface UnderServiceRepository extends JpaRepository<UnderService, Long> {
     Optional<UnderService> findByNameSubService(String nameUnderService);
-
-    Optional<UnderService> findById(Long id);
-
-    @Query("select u from UnderService u where u.MainTask.name=:name")
+    @Query("select u from UnderService u where u.mainTask.name=:name")
     List<UnderService> findUnderService(String name);
 }

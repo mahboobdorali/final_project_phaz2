@@ -10,6 +10,4 @@ import java.util.Optional;
 public interface ServiceRepository extends JpaRepository<MainTask, Long> {
     Optional<MainTask> findByName(String name);
 
-    Optional<MainTask> findById(Long id);
-
 }

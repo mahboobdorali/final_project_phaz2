@@ -21,7 +21,7 @@ public class UnderService extends BaseEntity {
     private String briefExplanation;
 
     @ManyToOne(fetch = FetchType.LAZY,cascade = CascadeType.PERSIST)
-    private MainTask MainTask;
+    private MainTask mainTask;
 
 }
 
