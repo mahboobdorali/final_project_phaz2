@@ -1,6 +1,5 @@
 package com.maktab.final_project_phaz2.service;
 
-import com.maktab.final_project_phaz2.date.model.Expert;
 import com.maktab.final_project_phaz2.date.model.Offer;
 import com.maktab.final_project_phaz2.date.repository.OfferRepository;
 import com.maktab.final_project_phaz2.exception.NoResultException;
@@ -30,8 +29,8 @@ public class OfferService {
         return offerRepository.findAll();
     }
 
-    public Offer updateOffer(Offer offer) {
-        return offerRepository.save(offer);
+    public void updateOffer(Offer offer) {
+        offerRepository.save(offer);
     }
 
     public Offer findById(Long id) {
@@ -42,4 +41,5 @@ public class OfferService {
     public List<Offer> showAllOfferByExpert(String emailAddress) {
         return offerRepository.listOfferByExpert(emailAddress);
     }
+
 }
