@@ -61,12 +61,6 @@ public class CustomerController {
         return ResponseEntity.ok().body("customer deleted");
     }
 
-    @GetMapping("/get-all_customer")
-    public ResponseEntity<List<UserDto>> getAllCustomer() {
-        return ResponseEntity.ok().body(customerService.getAllCustomer().stream().
-                map(customer -> mapper.map(customer, UserDto.class)).collect(Collectors.toList()));
-    }
-
     @GetMapping("/find-customer-by-id")
     public ResponseEntity<UserDto> getById(@RequestParam("id") @Min(1) Long id) {
         Customer customerById = customerService.findCustomerById(id);
@@ -84,7 +78,7 @@ public class CustomerController {
 
     @PutMapping("/change_password")
     public ResponseEntity<String> changePassword(@Valid @RequestBody PasswordDto passwordDto) {
-        customerService.changePassword(passwordDto.getOldPassword(), passwordDto.getNewPassword());
+        customerService.changePassword(passwordDto.getNewPassword(), passwordDto.getConfirmPassword());
         return ResponseEntity.ok().body("password changed :)");
     }
 
@@ -129,9 +123,15 @@ public class CustomerController {
     }
 
     @PutMapping("/switching-status")
-    public ResponseEntity<String> changeStatusToFinish(@RequestParam("id") Long id) {
-        customerService.changeSituationForFinish(id);
+    public ResponseEntity<String> changeStatusToFinish(@RequestParam("idOffer") Long idOffer,
+                                                       @RequestParam("idOrder") Long idOrder      ) {
+        customerService.changeSituationForFinish(idOffer, idOrder);
         return ResponseEntity.ok().body("*situation of your order changed to done");
+    }
+    @GetMapping("/list-orders-for-payed")
+    public ResponseEntity<List<OrderDto>> ListOrderCustomerForPayed(@RequestParam("currentSituation") CurrentSituation currentSituation){
+        return ResponseEntity.ok().body(orderService.findOrderByStatusForPayedByCustomer(currentSituation).stream()
+                .map(orderCustomer -> mapper.map(orderCustomer, OrderDto.class)).collect(Collectors.toList()));
     }
 
     @PutMapping("payment-from-credit")
@@ -145,15 +145,6 @@ public class CustomerController {
         Opinion opinion = mapper.map(opinionDto, Opinion.class);
         customerService.saveComments(opinion, idExpert);
         return ResponseEntity.ok().body("*your score is save");
-    }
-
-    @PostMapping("/save-done-date")
-    public ResponseEntity<String> saveDoneDateByCustomer(@Valid @RequestBody DateOrderCustomerDto dateOrderCustomerDto,
-                                                         @RequestParam("idOffer") Long idOffer,
-                                                         @RequestParam("idOrder") Long idOrder) {
-        OrderCustomer orderCustomer = mapper.map(dateOrderCustomerDto, OrderCustomer.class);
-        customerService.setDoneDate(orderCustomer.getWorkDone(), idOffer, idOrder);
-        return ResponseEntity.ok().body("*the completion time of the work was recorded by you");
     }
 
     @GetMapping("/pay/online")
@@ -174,11 +165,6 @@ public class CustomerController {
         return "invalid captcha";
     }
 
-    @GetMapping("/search-customer-by-admin-")
-    public ResponseEntity<List<SearchCustomerDto>> filterCustomerByAdmin(@Valid @RequestBody SearchCustomerDto customer) {
-        return ResponseEntity.ok().body(customerService.filterCustomerByCondition(customer).stream().
-                map(customer1 -> mapper.map(customer1, SearchCustomerDto.class)).collect(Collectors.toList()));
-    }
 
     @GetMapping("/show-credit-customer")
     public ResponseEntity<Double> showCustomerAmount() {
@@ -186,9 +172,8 @@ public class CustomerController {
     }
 
     @GetMapping("/show-all-order-for-customer")
-    public ResponseEntity<List<OrderCustomerDto>> showAllOrderForCustomer(@RequestParam("emailCustomer")String emailCustomer,
-                                                                          @RequestParam("currentSituation")CurrentSituation currentSituation){
-        return ResponseEntity.ok().body(orderService.showAllOrderCustomer(emailCustomer, currentSituation).stream().
+    public ResponseEntity<List<OrderCustomerDto>> showAllOrderForCustomer(){
+        return ResponseEntity.ok().body(orderService.showAllOrderCustomer().stream().
                 map(orderCustomer -> mapper.map(orderCustomer,OrderCustomerDto.class)).collect(Collectors.toList()));
     }
 }

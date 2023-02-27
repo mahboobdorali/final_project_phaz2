@@ -1,7 +1,6 @@
 package com.maktab.final_project_phaz2.service;
 
 import com.maktab.final_project_phaz2.Util.DateUtil;
-//import com.maktab.final_project_phaz2.date.dto.CreditCardDto;
 import com.maktab.final_project_phaz2.date.dto.SearchCustomerDto;
 import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
@@ -21,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 
@@ -41,7 +41,7 @@ public class CustomerService {
         Optional<Customer> byEmailAddress = customerRepository.findByEmailAddress(customer.getEmailAddress());
         if (byEmailAddress.isPresent())
             throw new DuplicateEntryException("you have already registered once in the system");
-        customer.setRole(Role.CUSTOMER);
+        customer.setRole(Role.ROLE_CUSTOMER);
         customer.setPassword(passwordEncoder.encode(customer.getPassword()));
         customerRepository.save(customer);
     }
@@ -77,13 +77,13 @@ public class CustomerService {
                 orElseThrow(() -> new NoResultException("this customer dose not exist"));
     }
 
-    public void changePassword(String oldPassword, String newPassword) {
+    public void changePassword(String newPassword, String confirmPassword) {
         Customer customer = customerRepository.findByEmailAddress(((Person) SecurityContextHolder.getContext()
                         .getAuthentication().getPrincipal()).getEmailAddress()).
                 orElseThrow(() -> new NoResultException(" this customer dose not exist"));
-        if (!(customer.getPassword().equals(oldPassword)))
+        if (!(newPassword.equals(confirmPassword)))
             throw new RequestIsNotValidException("is not exist password");
-        customer.setPassword(newPassword);
+        customer.setPassword(passwordEncoder.encode(confirmPassword));
         customerRepository.save(customer);
     }
 
@@ -130,16 +130,20 @@ public class CustomerService {
         offerService.updateOffer(offerId);
     }
 
-    public void setDoneDate(Date doneDate, Long idOffer, Long idOrder) {
+    public void setDoneDate(Long idOffer, Long idOrder) {
         Offer offer = offerService.findById(idOffer);
         OrderCustomer order = orderService.findOrderById(idOrder);
-        if (doneDate.before(offer.getTimeProposeToStartWork()))
+        LocalDateTime time = DateUtil.dateToLocalDateTime(offer.getTimeProposeToStartWork());
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(time))
             throw new NoResultException("the entered time is before the time suggested by the expert");
-        order.setWorkDone(doneDate);
+        Date toDate = DateUtil.changeLocalDateToDate(now);
+        order.setWorkDone(toDate);
         orderService.saveAllOrder(order);
     }
 
-    public void changeSituationForFinish(Long id) {
+    public void changeSituationForFinish(Long id, Long idOrder) {
+        setDoneDate(id, idOrder);
         Offer offer = offerService.findById(id);
         Long differentBetweenTwoDate = DateUtil.differentBetweenTwoDate
                 (offer.getTimeProposeToStartWork(), offer.getOrderCustomer().getWorkDone());
@@ -164,14 +168,15 @@ public class CustomerService {
         double percent = (offerById.getPriceOffer() / 100) * 70;
         offerById.getExpert().setAmount(percent);
         offerById.getOrderCustomer().setCurrentSituation(CurrentSituation.PAID);
-        offerService.updateOffer(offerById);
-        registerCustomer(customerByEmail);
+        offerService.saveAllOffer(offerById);
+        updateCustomer(customerByEmail);
     }
 
-    public void saveComments(Opinion opinion,Long idExpert) {
+    public void saveComments(Opinion opinion, Long idExpert) {
         Expert byId = expertService.findExpertById(idExpert);
         if (opinion.getScore() < 1 || opinion.getScore() > 6)
-            throw new RequestIsNotValidException("the score entered must be a number between one and five(1-5");
+            throw new RequestIsNotValidException("the score entered must be a number between one and five(1-5)");
+        opinion.setExpert(byId);
         opinionService.registerOpinion(opinion);
         byId.setAverageScore(byId.getAverageScore() + opinion.getScore());
         expertService.updateExpert(byId);
@@ -193,9 +198,11 @@ public class CustomerService {
             return criteriaBuilder.and(predicate.toArray(new Predicate[0]));
         });
     }
+
     public double showAmountToCustomer() {
         Customer customer = findCustomerByEmail(((Person) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal()).getEmailAddress());
         return customer.getAmount();
     }
+
 }
