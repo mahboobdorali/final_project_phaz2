@@ -3,7 +3,6 @@ package com.maktab.final_project_phaz2.service;
 import com.maktab.final_project_phaz2.date.model.Expert;
 import com.maktab.final_project_phaz2.date.model.Image;
 import com.maktab.final_project_phaz2.date.repository.ImageRepository;
-import com.maktab.final_project_phaz2.exception.NoResultException;
 import com.maktab.final_project_phaz2.exception.RequestIsNotValidException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
