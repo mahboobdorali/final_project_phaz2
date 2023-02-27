@@ -10,5 +10,4 @@ import java.util.List;
 public interface OpinionRepository extends JpaRepository<Opinion,Long> {
     @Query("select o from Opinion o where o.expert.emailAddress=:emailAddress")
     List<Opinion>showAllScore (String emailAddress);
-
 }

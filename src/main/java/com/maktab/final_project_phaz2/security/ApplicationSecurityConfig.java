@@ -47,7 +47,8 @@ public class ApplicationSecurityConfig {
     public void configureGlobal(AuthenticationManagerBuilder auth)
             throws Exception {
 
-        auth.userDetailsService(username -> customerRepository.findByEmailAddress(username)
+        auth.
+                userDetailsService(username -> customerRepository.findByEmailAddress(username)
                         .orElseThrow(() -> new UsernameNotFoundException(String
                                 .format("this %s not found", username))))
                 .passwordEncoder(passwordEncoder).and()
@@ -55,9 +56,10 @@ public class ApplicationSecurityConfig {
                         .orElseThrow(() -> new UsernameNotFoundException(String
                                 .format("this %s not found", username))))
                 .passwordEncoder(passwordEncoder).and()
-                .userDetailsService(username -> adminRepository.findByEmail(username)
+                .userDetailsService(username -> adminRepository.findByEmailAddress(username)
                         .orElseThrow(() -> new UsernameNotFoundException(String
                                 .format("this %s not found", username))))
                 .passwordEncoder(passwordEncoder);
+
     }
 }
