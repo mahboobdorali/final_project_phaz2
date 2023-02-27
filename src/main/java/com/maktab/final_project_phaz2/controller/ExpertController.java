@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 public class ExpertController {
     private final ModelMapper mapper;
     private final ExpertService expertService;
-    private final AdminService adminService;
     private final OpinionService opinionService;
     private final OrderService orderService;
     private final ImageService imageService;
@@ -40,7 +39,7 @@ public class ExpertController {
             , HttpServletRequest request) throws MessagingException {
         Expert expert = mapper.map(expertDto, Expert.class);
         expertService.registerExpert(expert, getSiteURL(request));
-        return ResponseEntity.ok().body("**you are registered as an expert**");
+        return ResponseEntity.ok().body("**you are registered as an expert,confirm the code sent to your email to validate**");
     }
 
     private String getSiteURL(HttpServletRequest request) {
@@ -79,13 +78,6 @@ public class ExpertController {
         expertService.deleteExpert(expert);
         return ResponseEntity.ok().body("expert delete :)");
     }
-
-    @GetMapping("/get-all_expert")
-    public ResponseEntity<List<UserDto>> getAllExpert() {
-        return ResponseEntity.ok().body(expertService.getAllExpert().stream().
-                map(expert -> mapper.map(expert, UserDto.class)).collect(Collectors.toList()));
-    }
-
     @GetMapping("/find-expert-by-id")
     public ResponseEntity<UserDto> getById(@RequestParam("id") @Min(1) Long id) {
         Expert expertById = expertService.findExpertById(id);
@@ -102,12 +94,13 @@ public class ExpertController {
 
     @PutMapping("/change_password")
     public ResponseEntity<String> changePassword(@Valid @RequestBody PasswordDto passwordDto) {
-        expertService.changePassword(passwordDto.getOldPassword(), passwordDto.getNewPassword());
+        expertService.changePassword(passwordDto.getNewPassword(), passwordDto.getConfirmPassword());
         return ResponseEntity.ok().body("password changed :)");
     }
 
     @PostMapping("/save-offer")
-    public ResponseEntity<String> offerAnSubmitByExpert(@Valid @RequestBody OfferDto offerDto, @RequestParam("idUnderService") Long idUnderService,
+    public ResponseEntity<String> offerAnSubmitByExpert(@Valid @RequestBody OfferDto offerDto,
+                                                        @RequestParam("idUnderService") Long idUnderService,
                                                         @RequestParam("idOrder") Long idOrder) {
         Offer offer = mapper.map(offerDto, Offer.class);
         expertService.OfferAnSubmit(offer, idUnderService, idOrder);
@@ -119,44 +112,18 @@ public class ExpertController {
         expertService.setExpertToOffer(idOffer);
         return ResponseEntity.ok().body("this expert offer an submit");
     }
-
-    @PutMapping("/change-status")
-    public ResponseEntity<String> convertExpertStatus(@RequestParam("emailAddress") String emailAddress) {
-        adminService.convertStatus(emailAddress);
-        return ResponseEntity.ok().body("expert status changed to approved:)");
-    }
-
-    @PostMapping("/add-expert-to-under-service")
-    public ResponseEntity<String> addExpertToUnderServiceByAdmin(@RequestBody AddExpertToUnderDto addExpertToUnderDto) {
-        adminService.addExpertToUnderService(addExpertToUnderDto.getIdUnderService(), addExpertToUnderDto.getIdExpert());
-        return ResponseEntity.ok().body("this expert add to underService");
-    }
-
-    @DeleteMapping("/delete-expert-from-under-service")
-    public ResponseEntity<String> deleteExpertFromUnderServiceByAdmin(@RequestParam("idUnderService") Long idUnderService, @RequestParam("idExpert") Long idExpert) {
-        adminService.deleteExpertFromUnderService(idUnderService, idExpert);
-        return ResponseEntity.ok().body("this expert deleted from underService");
-    }
-
     @GetMapping("/under-service-by-status")
     public ResponseEntity<List<OrderDto>> ListUnderRelatedExpertInStatus(
             @RequestParam("name") String name, @RequestParam("status") CurrentSituation status,
             @RequestParam("status1") CurrentSituation status1) {
-        return ResponseEntity.ok().body(orderService.findOrderByUnderServiceAndStatus(name, status, status1).stream()
-                .map(orderCustomer -> mapper.map(orderCustomer, OrderDto.class)).collect(Collectors.toList()));
-    }
-
-    @GetMapping("/list-orders-for-payed")
-    public ResponseEntity<List<OrderDto>> ListOrderCustomerForPayed(@RequestParam("currentSituation") CurrentSituation currentSituation
-            , @RequestParam("emailAddress") String emailAddress) {
-        return ResponseEntity.ok().body(orderService.findOrderByStatusForPayedByCustomer(emailAddress, currentSituation).stream()
+        return ResponseEntity.ok().body(orderService.findOrderByUnderServiceAndStatus(name,status,status1).stream()
                 .map(orderCustomer -> mapper.map(orderCustomer, OrderDto.class)).collect(Collectors.toList()));
     }
 
     @GetMapping("/show-scores")
-    public ResponseEntity<List<OpinionShowScoreDto>> ListOrder() {
+    public ResponseEntity<List<OpinionDto>> ListOrder() {
         return ResponseEntity.ok().body(opinionService.showOpinionToExpert().stream()
-                .map(opinion -> mapper.map(opinion, OpinionShowScoreDto.class)).collect(Collectors.toList()));
+                .map(opinion -> mapper.map(opinion, OpinionDto.class)).collect(Collectors.toList()));
     }
 
     @PostMapping("/upload-image")
@@ -169,12 +136,6 @@ public class ExpertController {
     public ResponseEntity<byte[]> getImageFromDatabase(@RequestParam("emailAddress") String emailAddress) {
         byte[] image = imageService.getImage(emailAddress);
         return ResponseEntity.ok().contentType(MediaType.valueOf("image/jpeg")).body(image);
-    }
-
-    @GetMapping("/get-all-new-expert")
-    public ResponseEntity<List<ExpertDtoForFilter>> findAllExpertNewStatus(@RequestParam("status") ApprovalStatus status) {
-        return ResponseEntity.ok().body(expertService.findAllByNewStatus(status).stream()
-                .map(expert -> mapper.map(expert, ExpertDtoForFilter.class)).collect(Collectors.toList()));
     }
 
     @GetMapping("/show-alone-score")
@@ -192,9 +153,8 @@ public class ExpertController {
         return ResponseEntity.ok().body(expertService.showAmountToExpert());
     }
     @GetMapping("/show-all-order-for-expert")
-    public ResponseEntity<List<OrderCustomerDto>> showAllOrderForCustomer(@RequestParam("emailExpert")String emailExpert,
-                                                                          @RequestParam("currentSituation")CurrentSituation currentSituation){
-        return ResponseEntity.ok().body(orderService.showAllOrderExpert(emailExpert, currentSituation).stream().
+    public ResponseEntity<List<OrderCustomerDto>> showAllOrderForCustomer(){
+        return ResponseEntity.ok().body(orderService.showAllOrderExpert().stream().
                 map(orderCustomer -> mapper.map(orderCustomer,OrderCustomerDto.class)).collect(Collectors.toList()));
     }
 }
