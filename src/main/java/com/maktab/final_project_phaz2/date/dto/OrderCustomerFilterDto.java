@@ -29,9 +29,9 @@ public class OrderCustomerFilterDto {
     private Date dateAndTimeOfWork;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDate beforeTime;
+    private Date beforeTime;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDate afterTime;
+    private Date afterTime;
 
 }

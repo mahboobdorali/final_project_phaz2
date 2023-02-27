@@ -1,6 +1,7 @@
 package com.maktab.final_project_phaz2.date.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import lombok.*;
 
 import java.util.Date;
@@ -24,4 +25,6 @@ public class OrderCustomerDto {
     private String city;
 
     private String plaque;
+
+    private CurrentSituation currentSituation;
 }

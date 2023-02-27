@@ -20,20 +20,26 @@ public interface OrderRepository extends JpaRepository<OrderCustomer, Long>, Jpa
     @Query("select o from OrderCustomer o where o.underService.nameSubService=:nameSubService" +
             " and o.currentSituation=:currentSituation or" +
             " o.currentSituation=:currentSituation1")
-    List<OrderCustomer> findAllByUnderService(String nameSubService, CurrentSituation currentSituation, CurrentSituation currentSituation1);
+    List<OrderCustomer> findAllByUnderService(String nameSubService,CurrentSituation currentSituation,
+                                              CurrentSituation currentSituation1);
 
     @Transactional
     @Query("select o from OrderCustomer o where o.customer.emailAddress=:emailAddress and o.currentSituation=:currentSituation")
     List<OrderCustomer> findAllByStatus(String emailAddress, CurrentSituation currentSituation);
 
     @Transactional
-    @Query("select o from OrderCustomer o where o.expert.emailAddress=:emailAddress and o.currentSituation=:currentSituation")
-    List<OrderCustomer> findAllByStatusByExpert(String emailAddress, CurrentSituation currentSituation);
+    @Query("select o from OrderCustomer o where o.customer.emailAddress=:emailAddress")
+    List<OrderCustomer> findAllByCustomer(String emailAddress);
 
+    @Transactional
+    @Query("select o from OrderCustomer o where o.expert.emailAddress=:emailAddress ")
+    List<OrderCustomer> findAllByExpert(String emailAddress);
 
-    @Query("select count (o.customer)from OrderCustomer o where o.customer.emailAddress=:emailAddress and o.currentSituation=:currentSituation")
-    int countOrderCustomer(String emailAddress, CurrentSituation currentSituation);
+    @Transactional
+    @Query("select count (o.customer)from OrderCustomer o where o.customer.emailAddress=:emailAddress")
+    int countOrderCustomer(String emailAddress);
 
+    @Transactional
     @Query("select count(o.expert)from OrderCustomer o where o.expert.emailAddress=:emailAddress and o.currentSituation=:currentSituation")
     int countOrderExpert(String emailAddress, CurrentSituation currentSituation);
 

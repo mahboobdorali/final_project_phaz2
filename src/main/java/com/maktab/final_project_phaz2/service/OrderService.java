@@ -10,6 +10,7 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,7 +23,6 @@ import java.util.List;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final ServiceUnderService serviceUnderService;
-
     private final MainTaskService mainTaskService;
 
 
@@ -48,16 +48,19 @@ public class OrderService {
         return orderRepository.findById(id).orElseThrow(() -> new NoResultException("this order is not exist"));
     }
 
-    public List<OrderCustomer> findOrderByUnderServiceAndStatus(String name, CurrentSituation status, CurrentSituation status1) {
-        if (!(status.equals(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION) ||
-                status1.equals(CurrentSituation.WAITING_FOR_EXPERT_OFFER)))
+    public List<OrderCustomer> findOrderByUnderServiceAndStatus(String name, CurrentSituation status,
+                                                                CurrentSituation status1) {
+        if (!(status.equals(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION) || (status.equals(CurrentSituation.WAITING_FOR_EXPERT_OFFER) ||
+                status1.equals(CurrentSituation.WAITING_FOR_EXPERT_OFFER) || status1.equals(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION))))
             throw new NoResultException("your order status is not accepted for ordering!!");
         return orderRepository.findAllByUnderService(name, status, status1);
     }
 
-    public List<OrderCustomer> findOrderByStatusForPayedByCustomer(String emailAddress, CurrentSituation currentSituation) {
+    public List<OrderCustomer> findOrderByStatusForPayedByCustomer(CurrentSituation currentSituation) {
         if (!currentSituation.equals(CurrentSituation.DONE))
             throw new RequestIsNotValidException("your work is not finished yet!!you can not be redirect to the payment stage :(");
+        String emailAddress = ((Person) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal()).getEmailAddress();
         return orderRepository.findAllByStatus(emailAddress, currentSituation);
     }
 
@@ -90,19 +93,26 @@ public class OrderService {
         });
     }
 
-    public int countOrderOfCustomer(String emailAddress, CurrentSituation currentSituation) {
-        return orderRepository.countOrderCustomer(emailAddress, currentSituation);
+    public int countOrderOfCustomer(String emailAddress) {
+        return orderRepository.countOrderCustomer(emailAddress);
     }
 
     public int countOrderOfExpert(String emailAddress, CurrentSituation currentSituation) {
-        return orderRepository.countOrderExpert(emailAddress, currentSituation);
+        int i = orderRepository.countOrderExpert(emailAddress, currentSituation);
+        System.out.println(i);
+        return i;
     }
 
-    public List<OrderCustomer> showAllOrderCustomer(String emailCustomer, CurrentSituation currentSituation) {
-        return orderRepository.findAllByStatus(emailCustomer,currentSituation);
+    public List<OrderCustomer> showAllOrderCustomer() {
+        String emailAddress = ((Person) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal()).getEmailAddress();
+        return orderRepository.findAllByCustomer(emailAddress);
     }
-    public List<OrderCustomer> showAllOrderExpert(String emailExpert, CurrentSituation currentSituation) {
-        return orderRepository.findAllByStatusByExpert(emailExpert,currentSituation);
+
+    public List<OrderCustomer> showAllOrderExpert() {
+        String emailAddress = ((Person) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal()).getEmailAddress();
+        return orderRepository.findAllByExpert(emailAddress);
     }
 
 }
