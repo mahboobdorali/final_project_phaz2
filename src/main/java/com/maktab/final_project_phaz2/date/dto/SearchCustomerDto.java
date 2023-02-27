@@ -25,10 +25,10 @@ public class SearchCustomerDto {
     private Role role;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDate beforeTime;
+    private Date beforeTime;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDate afterTime;
+    private Date afterTime;
 
     private Date dateAndTimeOfRegistration;
 }
