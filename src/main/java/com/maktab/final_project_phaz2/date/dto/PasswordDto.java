@@ -9,8 +9,8 @@ import lombok.Setter;
 public class PasswordDto {
 
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=\\S+$).{8}$")
-    private String oldPassword;
+    private String newPassword;
 
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=\\S+$).{8}$")
-    private String newPassword;
+    private String confirmPassword;
 }
