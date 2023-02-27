@@ -16,13 +16,13 @@ import lombok.Setter;
 public class AdminDto {
 
     @Pattern(regexp = "^[A-Za-z]{3,29}$")
-    private String firstname;
+    private String name;
 
     @Pattern(regexp = "^[A-Za-z]{3,29}$")
-    private String lastname;
+    private String family;
 
     @Email
-    private String email;
+    private String emailAddress;
 
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=\\S+$).{8}$")
     private String password;

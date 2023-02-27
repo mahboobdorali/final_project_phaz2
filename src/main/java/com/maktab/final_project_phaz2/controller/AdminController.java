@@ -5,10 +5,8 @@ import com.maktab.final_project_phaz2.date.model.Admin;
 import com.maktab.final_project_phaz2.date.model.Customer;
 import com.maktab.final_project_phaz2.date.model.MainTask;
 import com.maktab.final_project_phaz2.date.model.UnderService;
-import com.maktab.final_project_phaz2.service.AdminService;
-import com.maktab.final_project_phaz2.service.MainTaskService;
-import com.maktab.final_project_phaz2.service.OrderService;
-import com.maktab.final_project_phaz2.service.ServiceUnderService;
+import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
+import com.maktab.final_project_phaz2.service.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +26,10 @@ public class AdminController {
     private final MainTaskService mainTaskService;
     private final AdminService adminService;
     private final OrderService orderService;
+    private final CustomerService customerService;
+    private final ExpertService expertService;
 
-    @PostMapping("/add_expert")
+    @PostMapping("/add_admin")
     public ResponseEntity<String> addCustomer(@Valid @RequestBody AdminDto adminDto) {
         Admin admin = mapper.map(adminDto, Admin.class);
         adminService.registerAdmin(admin);
@@ -37,7 +37,8 @@ public class AdminController {
     }
 
     @PostMapping("/add-under-service")
-    public ResponseEntity<String> addUnderService(@Valid @RequestBody UnderServiceDto underServiceDto, @RequestParam Long idService) {
+    public ResponseEntity<String> addUnderService(@Valid @RequestBody UnderServiceDto underServiceDto,
+                                                  @RequestParam Long idService) {
         UnderService underService = mapper.map(underServiceDto, UnderService.class);
         serviceUnderService.addUnderServiceByAdmin(underService, idService);
         return ResponseEntity.ok().body("**this underService add By admin**");
@@ -76,6 +77,24 @@ public class AdminController {
                 map(mainTask -> mapper.map(mainTask, ServiceDto.class)).collect(Collectors.toList()));
     }
 
+    @PostMapping("/add-expert-to-under-service")
+    public ResponseEntity<String> addExpertToUnderServiceByAdmin(@RequestBody AddExpertToUnderDto addExpertToUnderDto) {
+        adminService.addExpertToUnderService(addExpertToUnderDto.getIdUnderService(), addExpertToUnderDto.getIdExpert());
+        return ResponseEntity.ok().body("this expert add to underService");
+    }
+
+    @DeleteMapping("/delete-expert-from-under-service")
+    public ResponseEntity<String> deleteExpertFromUnderServiceByAdmin(@RequestParam("idUnderService") Long idUnderService, @RequestParam("idExpert") Long idExpert) {
+        adminService.deleteExpertFromUnderService(idUnderService, idExpert);
+        return ResponseEntity.ok().body("this expert deleted from underService");
+    }
+
+    @PutMapping("/change-status")
+    public ResponseEntity<String> convertExpertStatus(@RequestParam("emailAddress") String emailAddress) {
+        adminService.convertStatus(emailAddress);
+        return ResponseEntity.ok().body("expert status changed to approved:)");
+    }
+
     @GetMapping("/find-sub-service-by-name")
     public ResponseEntity<UnderServiceDto> getUnderServiceByName(@RequestParam("underServiceName") String underServiceName) {
         UnderService underServiceByName = serviceUnderService.findUnderServiceByName(underServiceName);
@@ -108,17 +127,46 @@ public class AdminController {
 
     @GetMapping("/search-by-admin")
     public ResponseEntity<List<SearchExpertDto>> filterAdmin(@Valid @RequestBody SearchExpertDto expert) {
-        return ResponseEntity.ok().body(adminService.filterExpertByCondition(expert).stream().
+        return ResponseEntity.ok().body(expertService.filterExpertByCondition(expert).stream().
                 map(expert1 -> mapper.map(expert1, SearchExpertDto.class)).collect(Collectors.toList()));
     }
 
     @GetMapping("/count-of-order-customer")
     public int countOfOrderCustomer(@Valid @RequestBody CountOrderDto countOrderDto) {
-        return orderService.countOrderOfCustomer(countOrderDto.getEmailAddress(), countOrderDto.getCurrentSituation());
+        return orderService.countOrderOfCustomer(countOrderDto.getEmailAddress());
     }
 
     @GetMapping("/count-of-order-expert")
     public int countOfOrderExpert(@Valid @RequestBody CountOrderDto countOrderDto) {
         return orderService.countOrderOfExpert(countOrderDto.getEmailAddress(), countOrderDto.getCurrentSituation());
+    }
+
+    @GetMapping("/get-all_customer")
+    public ResponseEntity<List<UserDto>> getAllCustomer() {
+        return ResponseEntity.ok().body(customerService.getAllCustomer().stream().
+                map(customer -> mapper.map(customer, UserDto.class)).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/get-all_expert")
+    public ResponseEntity<List<UserDto>> getAllExpert() {
+        return ResponseEntity.ok().body(expertService.getAllExpert().stream().
+                map(expert -> mapper.map(expert, UserDto.class)).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/search-customer-by-admin")
+    public ResponseEntity<List<SearchCustomerDto>> filterCustomerByAdmin(@Valid @RequestBody SearchCustomerDto customer) {
+        return ResponseEntity.ok().body(customerService.filterCustomerByCondition(customer).stream().
+                map(customer1 -> mapper.map(customer1, SearchCustomerDto.class)).collect(Collectors.toList()));
+    }
+
+    @GetMapping("/filter-order")
+    public ResponseEntity<List<OrderCustomerFilterDto>> filterOrderByAdmin(@Valid @RequestBody OrderCustomerFilterDto order) {
+        return ResponseEntity.ok().body(orderService.filterOrderByAdmin(order).stream().
+                map(customer -> mapper.map(customer, OrderCustomerFilterDto.class)).collect(Collectors.toList()));
+    }
+    @GetMapping("/get-all-new-expert")
+    public ResponseEntity<List<ExpertDtoForFilter>> findAllExpertNewStatus(@RequestParam("status") ApprovalStatus status) {
+        return ResponseEntity.ok().body(expertService.findAllByNewStatus(status).stream()
+                .map(expert -> mapper.map(expert, ExpertDtoForFilter.class)).collect(Collectors.toList()));
     }
 }
