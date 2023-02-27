@@ -23,7 +23,7 @@ public class CentralExceptionHandler {
 
     @ExceptionHandler(InputInvalidException.class)
     public ResponseEntity<?> handleException(InputInvalidException in) {
-        CustomException customException = new CustomException(HttpStatus.UNAUTHORIZED, in.getLocalizedMessage());
+        CustomException customException = new CustomException(HttpStatus.BAD_REQUEST, in.getLocalizedMessage());
         return new ResponseEntity<>(customException, customException.httpStatus());
     }
 
@@ -35,7 +35,7 @@ public class CentralExceptionHandler {
 
     @ExceptionHandler(SourceUsageRestrictionsException.class)
     public ResponseEntity<?> handleException(SourceUsageRestrictionsException sr) {
-        CustomException customException = new CustomException(HttpStatus.FORBIDDEN, sr.getLocalizedMessage());
+        CustomException customException = new CustomException(HttpStatus.BAD_REQUEST, sr.getLocalizedMessage());
         return new ResponseEntity<>(customException, customException.httpStatus());
     }
 }
