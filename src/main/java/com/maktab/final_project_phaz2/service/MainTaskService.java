@@ -18,10 +18,6 @@ import java.util.Optional;
 public class MainTaskService {
     private final ServiceRepository serviceRepository;
 
-    public void saveAllService(MainTask mainTask) {
-        serviceRepository.save(mainTask);
-    }
-
     public void deleteAllService(MainTask mainTask) {
         serviceRepository.delete(mainTask);
     }
