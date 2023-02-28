@@ -147,9 +147,12 @@ public class ExpertService {
     public void OfferAnSubmit(Offer offer, Long idUnder, Long idOrder) {
         checkConditionForOffer(idUnder, offer);
         OrderCustomer orderById = orderService.findOrderById(idOrder);
+        Expert expertById = findExpertById(((Person) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal()).getId());
         checkSituation(orderById.getCurrentSituation());
         orderById.setCurrentSituation(CurrentSituation.WAITING_FOR_SPECIALIST_SELECTION);
         offer.setOrderCustomer(orderById);
+        offer.setExpert(expertById);
         offerService.saveAllOffer(offer);
     }
 
@@ -162,15 +165,6 @@ public class ExpertService {
         if (currentSituationList.contains(currentSituation))
             throw new RequestIsNotValidException("your state is not safe");
     }
-
-    @Transactional
-    public void setExpertToOffer(Long idOffer) {
-        Offer offer = offerService.findById(idOffer);
-        Expert expertById = findExpertById(((Person) SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal()).getId());
-        offer.setExpert(expertById);
-    }
-
     public Long showScoreWithoutDescription() {
         Expert expertByEmail = findExpertByEmail(((Person) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal()).getEmailAddress());
@@ -210,6 +204,5 @@ public class ExpertService {
             return criteriaBuilder.and(predicateList.toArray(new Predicate[0]));
         });
     }
-
 }
 

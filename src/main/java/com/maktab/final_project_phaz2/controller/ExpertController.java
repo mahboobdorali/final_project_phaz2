@@ -78,6 +78,7 @@ public class ExpertController {
         expertService.deleteExpert(expert);
         return ResponseEntity.ok().body("expert delete :)");
     }
+
     @GetMapping("/find-expert-by-id")
     public ResponseEntity<UserDto> getById(@RequestParam("id") @Min(1) Long id) {
         Expert expertById = expertService.findExpertById(id);
@@ -107,16 +108,11 @@ public class ExpertController {
         return ResponseEntity.ok().body("this offer saved :)");
     }
 
-    @PostMapping("/set-expert-id")
-    public ResponseEntity<String> setExpert(@RequestParam Long idOffer) {
-        expertService.setExpertToOffer(idOffer);
-        return ResponseEntity.ok().body("this expert offer an submit");
-    }
     @GetMapping("/under-service-by-status")
     public ResponseEntity<List<OrderDto>> ListUnderRelatedExpertInStatus(
             @RequestParam("name") String name, @RequestParam("status") CurrentSituation status,
             @RequestParam("status1") CurrentSituation status1) {
-        return ResponseEntity.ok().body(orderService.findOrderByUnderServiceAndStatus(name,status,status1).stream()
+        return ResponseEntity.ok().body(orderService.findOrderByUnderServiceAndStatus(name, status, status1).stream()
                 .map(orderCustomer -> mapper.map(orderCustomer, OrderDto.class)).collect(Collectors.toList()));
     }
 
@@ -133,8 +129,8 @@ public class ExpertController {
     }
 
     @GetMapping("/get-image")
-    public ResponseEntity<byte[]> getImageFromDatabase(@RequestParam("emailAddress") String emailAddress) {
-        byte[] image = imageService.getImage(emailAddress);
+    public ResponseEntity<byte[]> getImageFromDatabase() {
+        byte[] image = imageService.getImage();
         return ResponseEntity.ok().contentType(MediaType.valueOf("image/jpeg")).body(image);
     }
 
@@ -148,13 +144,15 @@ public class ExpertController {
         return ResponseEntity.ok().body(offerService.showAllOfferByExpert(emailAddress).stream()
                 .map(offer -> mapper.map(offer, OfferDto.class)).collect(Collectors.toList()));
     }
+
     @GetMapping("/show-credit-expert")
-    public ResponseEntity<Double> showExpertAmount(){
+    public ResponseEntity<Double> showExpertAmount() {
         return ResponseEntity.ok().body(expertService.showAmountToExpert());
     }
+
     @GetMapping("/show-all-order-for-expert")
-    public ResponseEntity<List<OrderCustomerDto>> showAllOrderForCustomer(){
-        return ResponseEntity.ok().body(orderService.showAllOrderExpert().stream().
-                map(orderCustomer -> mapper.map(orderCustomer,OrderCustomerDto.class)).collect(Collectors.toList()));
+    public ResponseEntity<List<OrderCustomerDto>> showAllOrderForCustomer(@RequestParam("status") CurrentSituation status) {
+        return ResponseEntity.ok().body(orderService.showAllOrderExpert(status).stream().
+                map(orderCustomer -> mapper.map(orderCustomer, OrderCustomerDto.class)).collect(Collectors.toList()));
     }
 }
