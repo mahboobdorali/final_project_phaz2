@@ -27,13 +27,10 @@ public interface OrderRepository extends JpaRepository<OrderCustomer, Long>, Jpa
     @Query("select o from OrderCustomer o where o.customer.emailAddress=:emailAddress and o.currentSituation=:currentSituation")
     List<OrderCustomer> findAllByStatus(String emailAddress, CurrentSituation currentSituation);
 
-    @Transactional
-    @Query("select o from OrderCustomer o where o.customer.emailAddress=:emailAddress")
-    List<OrderCustomer> findAllByCustomer(String emailAddress);
 
     @Transactional
-    @Query("select o from OrderCustomer o where o.expert.emailAddress=:emailAddress ")
-    List<OrderCustomer> findAllByExpert(String emailAddress);
+    @Query("select o from OrderCustomer o where o.expert.emailAddress=:emailAddress and o.currentSituation=:currentSituation")
+    List<OrderCustomer> findAllByExpert(String emailAddress,CurrentSituation currentSituation);
 
     @Transactional
     @Query("select count (o.customer)from OrderCustomer o where o.customer.emailAddress=:emailAddress")

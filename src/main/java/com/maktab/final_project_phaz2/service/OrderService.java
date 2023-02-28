@@ -103,16 +103,21 @@ public class OrderService {
         return i;
     }
 
-    public List<OrderCustomer> showAllOrderCustomer() {
+    public List<OrderCustomer> showAllOrderCustomer(CurrentSituation status) {
         String emailAddress = ((Person) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal()).getEmailAddress();
-        return orderRepository.findAllByCustomer(emailAddress);
+        return orderRepository.findAllByStatus(emailAddress,status);
     }
 
-    public List<OrderCustomer> showAllOrderExpert() {
+    public List<OrderCustomer> showAllOrderExpert(CurrentSituation currentSituation) {
         String emailAddress = ((Person) SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal()).getEmailAddress();
-        return orderRepository.findAllByExpert(emailAddress);
+        return orderRepository.findAllByExpert(emailAddress, currentSituation);
     }
-
+    public List<OrderCustomer> showAllOrderExpertByAdmin(CurrentSituation currentSituation,String emailExpert) {
+        return orderRepository.findAllByExpert(emailExpert, currentSituation);
+    }
+    public List<OrderCustomer> showAllOrderCustomerByAdmin(CurrentSituation currentSituation,String emailCustomer) {
+        return orderRepository.findAllByStatus(emailCustomer, currentSituation);
+    }
 }
