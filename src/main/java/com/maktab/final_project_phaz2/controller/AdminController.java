@@ -6,6 +6,7 @@ import com.maktab.final_project_phaz2.date.model.Customer;
 import com.maktab.final_project_phaz2.date.model.MainTask;
 import com.maktab.final_project_phaz2.date.model.UnderService;
 import com.maktab.final_project_phaz2.date.model.enumuration.ApprovalStatus;
+import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.service.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -168,5 +169,17 @@ public class AdminController {
     public ResponseEntity<List<ExpertDtoForFilter>> findAllExpertNewStatus(@RequestParam("status") ApprovalStatus status) {
         return ResponseEntity.ok().body(expertService.findAllByNewStatus(status).stream()
                 .map(expert -> mapper.map(expert, ExpertDtoForFilter.class)).collect(Collectors.toList()));
+    }
+    @GetMapping("/history-order-for-expert")
+    public ResponseEntity<List<OrderCustomerDto>> historyOfExpertByAdmin(@RequestParam("status") CurrentSituation status,
+                                                                         @RequestParam("emailExpert") String emailExpert) {
+        return ResponseEntity.ok().body(orderService.showAllOrderExpertByAdmin(status,emailExpert).stream().
+                map(orderCustomer -> mapper.map(orderCustomer, OrderCustomerDto.class)).collect(Collectors.toList()));
+    }
+    @GetMapping("/history-order-for-customer")
+    public ResponseEntity<List<OrderCustomerDto>> historyOfCustomerByAdmin(@RequestParam("status") CurrentSituation status,
+                                                                         @RequestParam("emailCustomer") String emailCustomer){
+        return ResponseEntity.ok().body(orderService.showAllOrderCustomerByAdmin(status,emailCustomer).stream().
+                map(orderCustomer -> mapper.map(orderCustomer,OrderCustomerDto.class)).collect(Collectors.toList()));
     }
 }

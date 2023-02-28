@@ -34,10 +34,9 @@ public class AdminService {
 
     public void convertStatus(String emailAddress) {
         Expert expert1 = expertService.findExpertByEmail(emailAddress);
-        if (expert1.getApprovalStatus().equals(ApprovalStatus.ACCEPTED)) {
+        if (expert1.getApprovalStatus().equals(ApprovalStatus.ACCEPTED))
             throw new RequestIsNotValidException("you have already been approved by the administrator");
-        } else
-            expert1.setApprovalStatus(ApprovalStatus.ACCEPTED);
+        expert1.setApprovalStatus(ApprovalStatus.ACCEPTED);
         expertService.updateExpert(expert1);
     }
 
@@ -72,5 +71,6 @@ public class AdminService {
         underServiceByName.setBasePrice(newPrice);
         serviceUnderService.saveAllUnderService(underServiceByName);
     }
+
 }
 
