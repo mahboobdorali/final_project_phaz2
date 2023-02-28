@@ -19,16 +19,6 @@ public class OfferService {
         offerRepository.save(offer);
     }
 
-    public void deleteOffer(Offer offer) {
-
-        offerRepository.delete(offer);
-    }
-
-    public List<Offer> getAllOffer() {
-
-        return offerRepository.findAll();
-    }
-
     public void updateOffer(Offer offer) {
         offerRepository.save(offer);
     }
