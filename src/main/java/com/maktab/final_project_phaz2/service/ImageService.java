@@ -22,13 +22,14 @@ public class ImageService {
     private final ExpertService expertService;
 
     @Transactional
-    public void uploadImage(MultipartFile file, Long idExpert) throws IOException {
-        Expert expertById = expertService.findExpertById(idExpert);
+    public void uploadImage(MultipartFile file) throws IOException {
+        Expert expert = expertService.findExpertByEmail(((Person) SecurityContextHolder.getContext()
+                .getAuthentication().getPrincipal()).getEmailAddress());
         if ((!Objects.equals(file.getContentType(), "image/jpeg")) || file.getSize() > 300000)
             throw new RequestIsNotValidException("condition of image not safe");
         Image enterImage = imageRepository.save(Image.builder().type(file.getContentType()).imageData(file.getBytes()).build());
-        expertById.setImage(enterImage);
-        expertService.updateExpert(expertById);
+        expert.setImage(enterImage);
+        expertService.updateExpert(expert);
     }
 
     @Transactional
