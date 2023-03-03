@@ -123,8 +123,8 @@ public class ExpertController {
     }
 
     @PostMapping("/upload-image")
-    public ResponseEntity<String> uploadImage(@RequestParam("idExpert") Long idExpert, @RequestParam("image") MultipartFile file) throws IOException {
-        imageService.uploadImage(file, idExpert);
+    public ResponseEntity<String> uploadImage( @RequestParam("image") MultipartFile file) throws IOException {
+        imageService.uploadImage(file);
         return ResponseEntity.ok().body("your image saved :)");
     }
 
