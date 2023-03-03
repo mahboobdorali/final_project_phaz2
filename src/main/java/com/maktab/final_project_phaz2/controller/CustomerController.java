@@ -6,6 +6,7 @@ import com.maktab.final_project_phaz2.date.model.*;
 import com.maktab.final_project_phaz2.date.model.enumuration.CurrentSituation;
 import com.maktab.final_project_phaz2.exception.NoResultException;
 import com.maktab.final_project_phaz2.service.CustomerService;
+import com.maktab.final_project_phaz2.service.MainTaskService;
 import com.maktab.final_project_phaz2.service.OrderService;
 import com.maktab.final_project_phaz2.service.ServiceUnderService;
 import jakarta.validation.Valid;
@@ -29,7 +30,7 @@ public class CustomerController {
     private final CustomerService customerService;
     private final ServiceUnderService underService;
     private final RestTemplate restTemplate;
-
+    private final MainTaskService mainTaskService;
     private final OrderService orderService;
 
     @PostMapping("/add_customer")
@@ -96,6 +97,12 @@ public class CustomerController {
                         map(underService, UnderServiceDto.class)).collect(Collectors.toList()));
     }
 
+    @GetMapping("/showAll_main-service")
+    public ResponseEntity<List<ServiceDto>> getAllService() {
+        return ResponseEntity.ok().body(mainTaskService.getAllService().stream().
+                map(mainTask -> mapper.map(mainTask, ServiceDto.class)).collect(Collectors.toList()));
+    }
+
     @GetMapping("/sort-by-price")
     public ResponseEntity<List<OfferDto>> sortOfferByPrice(@RequestParam("idOrderCustomer") Long idOrderCustomer) {
         return ResponseEntity.ok().body(customerService.sortByPrice(idOrderCustomer).stream().map(offer1 -> mapper.
@@ -124,12 +131,13 @@ public class CustomerController {
 
     @PutMapping("/switching-status")
     public ResponseEntity<String> changeStatusToFinish(@RequestParam("idOffer") Long idOffer,
-                                                       @RequestParam("idOrder") Long idOrder      ) {
+                                                       @RequestParam("idOrder") Long idOrder) {
         customerService.changeSituationForFinish(idOffer, idOrder);
         return ResponseEntity.ok().body("*situation of your order changed to done");
     }
+
     @GetMapping("/list-orders-for-payed")
-    public ResponseEntity<List<OrderDto>> ListOrderCustomerForPayed(@RequestParam("currentSituation") CurrentSituation currentSituation){
+    public ResponseEntity<List<OrderDto>> ListOrderCustomerForPayed(@RequestParam("currentSituation") CurrentSituation currentSituation) {
         return ResponseEntity.ok().body(orderService.findOrderByStatusForPayedByCustomer(currentSituation).stream()
                 .map(orderCustomer -> mapper.map(orderCustomer, OrderDto.class)).collect(Collectors.toList()));
     }
@@ -172,8 +180,8 @@ public class CustomerController {
     }
 
     @GetMapping("/show-all-order-for-customer")
-    public ResponseEntity<List<OrderCustomerDto>> showAllOrderForCustomer(){
-        return ResponseEntity.ok().body(orderService.showAllOrderCustomer().stream().
-                map(orderCustomer -> mapper.map(orderCustomer,OrderCustomerDto.class)).collect(Collectors.toList()));
+    public ResponseEntity<List<OrderCustomerDto>> showAllOrderForCustomer(@RequestParam("status") CurrentSituation status) {
+        return ResponseEntity.ok().body(orderService.showAllOrderCustomer(status).stream().
+                map(orderCustomer -> mapper.map(orderCustomer, OrderCustomerDto.class)).collect(Collectors.toList()));
     }
 }

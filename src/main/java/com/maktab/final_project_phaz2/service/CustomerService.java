@@ -34,7 +34,6 @@ public class CustomerService {
     private final ServiceUnderService underService;
     private final OpinionService opinionService;
     private final ExpertService expertService;
-
     private final PasswordEncoder passwordEncoder;
 
     public void registerCustomer(Customer customer) {
